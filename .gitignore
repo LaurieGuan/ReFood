@@ -16,3 +16,7 @@ htmlcov/
 .obsidian/
 .idea/
 .vscode/
+
+# Node/Vite local build artifacts
+node_modules/
+dist/
