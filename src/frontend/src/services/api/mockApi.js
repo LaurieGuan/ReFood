@@ -1,6 +1,6 @@
 import { preferenceOptions } from '../../data/preferenceOptions.js';
 import { matchesPreferences } from '../../features/preferences/recipeFilters.js';
-// In-memory mock of the /api/v1 contract. Swap this module for fetch calls when Flask is ready.
+// Offline sample API plus intentionally browser-local recipes, favorites and preferences.
 const wait = (value, delay = 350) => new Promise((resolve) => setTimeout(() => resolve(structuredClone(value)), delay));
 const catalog = [
   { id: 'ing_egg', name: 'egg', display_name: 'Œuf', aliases: ['eggs', 'œufs'] },
@@ -61,7 +61,12 @@ export const mockApi = {
     return wait({ recipes: selected, total: selected.length });
   },
   async getRecipe(id) { const recipe = recipes.find((item) => item.id === id); if (!recipe) throw new Error('Recette introuvable.'); return wait(recipe); },
-  async listRecipes() { return wait({ items: recipes }); },
+  async listRecipes({ includeSamples = false } = {}) { return wait({ items: recipes.filter((recipe) => includeSamples || recipe.source === 'personal').map((recipe) => ({ ...recipe, data_source: recipe.source === 'demo' || recipe.data_source === 'demo' ? 'demo' : 'local', persistence: 'browser' })) }); },
+  async getLocalRecipe(id, { includeSamples = false } = {}) {
+    const recipe = recipes.find((item) => item.id === id && (includeSamples || item.source === 'personal')) ?? (favorites.includes(id) ? favoriteSnapshots[id] ?? recipes.find((item) => item.id === id) : null);
+    if (!recipe) throw new Error('Recette locale introuvable.');
+    return wait({ ...recipe, data_source: recipe.source === 'demo' || recipe.data_source === 'demo' ? 'demo' : 'local', persistence: 'browser' });
+  },
   async createRecipe(value) {
     const recipe = { ...value, id: `recipe_${crypto.randomUUID()}`, source: 'personal', source_url: null };
     recipes.push(recipe); persistRecipes(); return wait(recipe);
@@ -76,7 +81,7 @@ export const mockApi = {
     recipes = recipes.filter((item) => item.id !== id); favorites = favorites.filter((item) => item !== id);
     persistRecipes(); return wait({ deleted: true });
   },
-  async getFavorites() { return wait({ items: favorites.map((id) => recipes.find((item) => item.id === id) ?? favoriteSnapshots[id]).filter(Boolean) }); },
+  async getFavorites() { return wait({ items: favorites.map((id) => recipes.find((item) => item.id === id) ?? favoriteSnapshots[id]).filter(Boolean).map((recipe) => ({ ...recipe, data_source: recipe.source === 'demo' || recipe.data_source === 'demo' ? 'demo' : 'local', persistence: 'browser' })) }); },
   async favoriteRecipe(id, recipe) { if (!recipes.some((item) => item.id === id) && !recipe) throw new Error('Recette introuvable.'); if (recipe) favoriteSnapshots[id] = recipe; if (!favorites.includes(id)) favorites.push(id); persistRecipes(); return wait({ recipe_id: id, favorite: true }); },
   async unfavoriteRecipe(id) { favorites = favorites.filter((favoriteId) => favoriteId !== id); delete favoriteSnapshots[id]; persistRecipes(); return wait({ recipe_id: id, favorite: false }); },
   async getPreferenceOptions() { return wait(preferenceOptions); },

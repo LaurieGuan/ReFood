@@ -1,22 +1,17 @@
-"""Pantry HTTP endpoints with a replaceable in-memory demo adapter."""
+"""Confirmed user pantry, with explicit memory or MariaDB persistence metadata."""
 
 from importlib import import_module
 
-from flask import Blueprint, current_app
+from flask import Blueprint, current_app, make_response
 
 from schemas.pantry import PantryResponse, PantryUpdateRequest
+from werkzeug.exceptions import ServiceUnavailable
 from .http_utils import json_response, validate_request
 from .demo_identity import demo_user_id
 
 pantry_bp = Blueprint("pantry", __name__)
-DEMO_USER_ID = "demo_user"
-
-# Explicit demo mock, replaced when Developer 2's repository is available.
-_demo_pantry = PantryResponse()
-
-
 def get_pantry(user_id: str) -> PantryResponse:
-    """Call Developer 2's repository, with the local demo store as fallback."""
+    """Store genuine user data; report process memory when MariaDB is unconfigured."""
     if current_app.config.get("DATABASE_URL"):
         from database.catalog import SQLRepository
         from database.engine import get_engine
@@ -26,12 +21,11 @@ def get_pantry(user_id: str) -> PantryResponse:
     except ModuleNotFoundError as exc:
         if exc.name != "database.repositories":
             raise
-        return _demo_pantry
+        raise ServiceUnavailable("Pantry repository is not installed") from exc
     return repository._memory.get_pantry(user_id)
 
 
 def replace_pantry(user_id: str, update: PantryUpdateRequest) -> PantryResponse:
-    global _demo_pantry
     if current_app.config.get("DATABASE_URL"):
         from database.catalog import SQLRepository
         from database.engine import get_engine
@@ -41,14 +35,13 @@ def replace_pantry(user_id: str, update: PantryUpdateRequest) -> PantryResponse:
     except ModuleNotFoundError as exc:
         if exc.name != "database.repositories":
             raise
-        _demo_pantry = PantryResponse(items=update.items)
-        return _demo_pantry
+        raise ServiceUnavailable("Pantry repository is not installed") from exc
     return repository._memory.replace_pantry(user_id, update)
 
 
 @pantry_bp.get("")
 def read_pantry():
-    return json_response(PantryResponse, get_pantry(demo_user_id()))
+    return pantry_response(get_pantry(demo_user_id()))
 
 
 @pantry_bp.put("")
@@ -61,4 +54,11 @@ def update_pantry():
     except ValueError as exc:
         raise UnprocessableEntity(str(exc)) from None
     result = replace_pantry(demo_user_id(), update)
-    return json_response(PantryResponse, result)
+    return pantry_response(result)
+
+
+def pantry_response(result):
+    response = make_response(*json_response(PantryResponse, result))
+    response.headers["X-Refood-Source"] = "confirmed_user_input"
+    response.headers["X-Refood-Persistence"] = "mariadb" if current_app.config.get("DATABASE_URL") else "memory"
+    return response

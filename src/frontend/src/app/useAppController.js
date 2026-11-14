@@ -1,3 +1,4 @@
+import { basketSummary } from '../features/stores/basket.js';
 import { useMemo, useState } from "react";
 import { useScanSession } from "../hooks/useScanSession.js";
 import { useFavorites } from "../hooks/useFavorites.js";
@@ -71,6 +72,7 @@ export function useAppController() {
         if (!uniqueCandidates.has(key)) uniqueCandidates.set(key, candidate);
       }
       setScan({
+        data_source: responses.every((response) => response.data_source === 'demo') ? 'demo' : responses.every((response) => response.data_source === 'live') ? 'live' : 'unknown',
         scan_id: responses.map((response) => response.scan_id).join("_"),
         candidates: [...uniqueCandidates.values()],
         warnings: [
@@ -93,9 +95,10 @@ export function useAppController() {
     setLoading(true);
     setError("");
     try {
-      await api.savePantry(confirmedItems);
+      const pantry = await api.savePantry(confirmedItems);
+      setScan({ ...scan, confirmedItems, pantry_persistence: pantry.persistence });
+      if (pantry.persistence === 'memory') say('Ingrédients gardés en mémoire serveur uniquement; aucune sauvegarde MariaDB.');
       const response = await api.searchRecipes(confirmedItems.filter(hasStock), 100, preferences ?? {});
-      setScan({ ...scan, confirmedItems });
       setSuggestions(isDemoMode ? response.recipes : response.recipes.filter((recipe) => matchesPreferences(recipe, preferences ?? {})));
       setStage(2);
     } catch (e) {
@@ -108,7 +111,7 @@ export function useAppController() {
     setLoading(true);
     setError("");
     try {
-      setActiveRecipe(await api.getRecipe(id));
+      setActiveRecipe(await (screen === 'saved' ? mockApi.getLocalRecipe(id, { includeSamples: isDemoMode }) : api.getRecipe(id)));
     } catch (e) {
       setError(e.message);
     } finally {
@@ -134,15 +137,14 @@ export function useAppController() {
       const missing = selected.match?.missing_ingredients ?? selected.ingredients.filter((item) => item.essential && !ingredientIds.includes(item.ingredient_id));
       const response = await api.groceryPrices(missing, location);
       setPriceData(response);
-      const store = response.stores.find((entry) =>
-        response.offers.some((offer) => offer.store_id === entry.id),
-      );
+      const store = response.stores.find((entry) => basketSummary(missing, response.offers.filter((offer) => offer.store_id === entry.id), response.demo).complete)
+        ?? response.stores.find((entry) => response.offers.some((offer) => offer.store_id === entry.id));
       if (store) setSelectedStore(store.id);
     } catch (e) {
       setError(e.message);
       const missing = selected.match?.missing_ingredients ?? selected.ingredients.filter((item) => item.essential && !ingredientIds.includes(item.ingredient_id));
       setSelectedRecipe(selected);
-      setPriceData({ stores: [], offers: [], unpriced_ingredient_ids: missing.map((item) => item.ingredient_id), missing_ingredients: missing, demo: isDemoMode });
+      setPriceData({ stores: [], offers: [], unpriced_ingredient_ids: missing.map((item) => item.ingredient_id), missing_ingredients: missing, demo: isDemoMode, data_source: 'unavailable' });
     } finally {
       setLoading(false);
     }
@@ -152,9 +154,8 @@ export function useAppController() {
     const missing = selectedRecipe.match?.missing_ingredients ?? selectedRecipe.ingredients.filter(
       (item) => item.essential && !ingredientIds.includes(item.ingredient_id),
     );
-    const offers =
-      priceData?.offers.filter((offer) => offer.store_id === selectedStore) ??
-      [];
+    const basket = basketSummary(missing, priceData?.offers.filter((offer) => offer.store_id === selectedStore) ?? [], priceData?.demo);
+    const offers = basket.offers;
     const store = priceData?.stores.find((item) => item.id === selectedStore);
     const route = store?.address
       ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(store.address)}${origin.trim() ? `&origin=${encodeURIComponent(origin.trim())}` : ""}`
@@ -163,7 +164,8 @@ export function useAppController() {
       `REFOOD — Liste de courses`,
       `Recette : ${selectedRecipe.title}`,
       `Magasin : ${priceData?.stores.find((store) => store.id === selectedStore)?.name || "Non sélectionné"}`,
-      priceData?.demo ? "Données de démonstration — prix non actuels" : "Prix observés : disponibilité et correspondance à vérifier",
+      priceData?.data_source === "unavailable" ? "Unavailable — aucun prix disponible" : priceData?.demo ? "Données de démonstration — prix non actuels" : "Prix observés : disponibilité et correspondance à vérifier",
+      `${basket.complete ? "Panier complet" : "Panier incomplet — sous-total non comparable"} : ${basket.covered}/${basket.required} ingrédients chiffrés`,
       "",
       "À acheter:",
       ...missing.map((item) => {

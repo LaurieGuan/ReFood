@@ -1,3 +1,4 @@
+import { DataSource } from '../../components/DataSource.jsx';
 import { label } from "../../utils/ingredients.js";
 
 export function RecipeDetails({ recipe, onClose, onChoose, saved, onToggle }) {
@@ -16,6 +17,7 @@ export function RecipeDetails({ recipe, onClose, onChoose, saved, onToggle }) {
           · {recipe.servings ?? "—"} PORTIONS
         </p>
         <h2>{recipe.title}</h2>
+                <DataSource source={recipe.data_source} persistence={recipe.persistence} />
         <div className="safety-note">
           Allergènes et adéquation alimentaire : non vérifiés.
         </div>

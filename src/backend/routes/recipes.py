@@ -2,8 +2,8 @@
 
 from importlib import import_module
 
-from flask import Blueprint
-from werkzeug.exceptions import ServiceUnavailable
+from flask import Blueprint, make_response
+from werkzeug.exceptions import ServiceUnavailable, NotFound, UnprocessableEntity
 
 from schemas.recipes import RecipeMatch, RecipeSearchRequest, RecipeSearchResponse
 from schemas.substitutions import (
@@ -16,23 +16,21 @@ recipes_bp = Blueprint("recipes", __name__)
 
 
 def find_recipes(request_model: RecipeSearchRequest) -> list[RecipeMatch]:
-    """Call Developer 2's matcher, falling back to a schema-valid demo mock."""
+    """Only search the configured recipe catalog; fixtures are test inputs only."""
+    from services.recipe_matcher import match_recipes
+    return match_recipes(request_model, stored_recipes())
+
+
+def stored_recipes():
     from flask import current_app
-    if current_app.config.get("DATABASE_URL"):
-        from database.catalog import SQLRepository
-        from database.engine import get_engine
-        from services.recipe_matcher import match_recipes
-        recipes = SQLRepository(get_engine(current_app.config["DATABASE_URL"])).get_recipes()
-        if not recipes:
-            raise ServiceUnavailable("Recipe database is empty; import refood-recipes.jsonl.gz first")
-        return match_recipes(request_model, recipes)
-    try:
-        matcher = import_module("services.recipe_matcher").find_recipes
-    except ModuleNotFoundError as exc:
-        if exc.name != "services.recipe_matcher":
-            raise
-        return []
-    return matcher(request_model)
+    if not current_app.config.get("DATABASE_URL"):
+        raise ServiceUnavailable("Recipe database is not configured; set DATABASE_URL and import recipes")
+    from database.catalog import SQLRepository
+    from database.engine import get_engine
+    recipes = SQLRepository(get_engine(current_app.config["DATABASE_URL"])).get_recipes()
+    if not recipes:
+        raise ServiceUnavailable("Recipe database is empty; import recipes first")
+    return recipes
 
 
 @recipes_bp.post("/search")
@@ -40,19 +38,19 @@ def search_recipes():
     search_request = validate_request(RecipeSearchRequest)
     matches = find_recipes(search_request)
     response = RecipeSearchResponse(results=matches[: search_request.limit])
-    return json_response(RecipeSearchResponse, response)
+    result = make_response(*json_response(RecipeSearchResponse, response))
+    result.headers["X-Refood-Source"] = "recipe_catalog"
+    return result
 
 
 def suggest_substitutions(search: SubstitutionSuggestionRequest):
-    """Developer 3 integration; empty suggestions are a temporary mock."""
+    """Delegate suggestions; a missing service is unavailable."""
     try:
         service = import_module("services.substitutions")
     except ModuleNotFoundError as exc:
         if exc.name != "services.substitutions":
             raise
-        return SubstitutionSuggestionResponse(
-            recipe_id=search.recipe_id, original_ingredient_id=search.ingredient_id
-        )
+        raise ServiceUnavailable("Substitution suggestions are not available") from exc
     return service.suggest_substitutions(search)
 
 
@@ -64,9 +62,15 @@ def calculate_variation(variation: RecipeVariationRequest):
         if exc.name != "services.recipe_matcher":
             raise
         raise ServiceUnavailable("Recipe variation service is not available") from exc
-    if not hasattr(service, "calculate_variation"):
+    if not hasattr(service, "apply_swaps"):
         raise ServiceUnavailable("Recipe variation service is not available")
-    return service.calculate_variation(variation)
+    recipe = next((recipe for recipe in stored_recipes() if recipe.recipe_id == variation.recipe_id), None)
+    if recipe is None:
+        raise NotFound("Recipe not found in the stored catalog")
+    try:
+        return service.apply_swaps(recipe, variation.swaps, variation.pantry)
+    except ValueError as exc:
+        raise UnprocessableEntity(str(exc)) from None
 
 
 @recipes_bp.post("/substitutions")

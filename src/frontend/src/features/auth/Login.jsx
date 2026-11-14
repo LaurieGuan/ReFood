@@ -1,3 +1,4 @@
+import { ApiModeControl } from '../../components/ApiModeControl.jsx';
 import React, { useState } from 'react';
 
 export function Login({ onDemo }) {
@@ -37,7 +38,7 @@ export function Login({ onDemo }) {
       <p className="login-intro-footer">Une petite action pour votre cuisine et pour la planète.</p>
     </section>
     <section className="login-main">
-      <div className="login-card">
+      <div className="login-card"><ApiModeControl />
         <p className="login-kicker">BIENVENUE CHEZ REFOOD</p>
         <h2>{view === 'login' ? 'Heureux de vous revoir.' : view === 'register' ? 'Bienvenue chez Refood.' : 'Mot de passe oublié ?'}</h2>
         <p className="login-subtitle">{view === 'login' ? 'Connectez-vous pour retrouver votre cuisine.' : view === 'register' ? 'Créez votre compte pour retrouver votre cuisine.' : 'Indiquez votre adresse courriel pour réinitialiser votre mot de passe.'}</p>
@@ -54,8 +55,8 @@ export function Login({ onDemo }) {
         </form>
         <p className="login-account">{view === 'login' ? 'Pas encore de compte ? ' : 'Vous avez déjà un compte ? '}<button className="login-link" type="button" onClick={() => changeView(view === 'login' ? 'register' : 'login')}>{view === 'login' ? 'Créer un compte' : 'Se connecter'}</button></p>
         <div className="login-divider"><span>ou</span></div>
-        <button className="login-demo" type="button" onClick={onDemo}>Découvrir la démo <span>→</span></button>
-        <p className="login-footnote">La démo est accessible sans compte.</p>
+        <button className="login-demo" type="button" onClick={onDemo}>Continuer sans compte <span>→</span></button>
+        <p className="login-footnote">Le mode API est indiqué ci-dessus.</p>
       </div>
       <p className="login-bottom">REFOOD · POUR UNE CUISINE PLUS MALIGNE</p>
     </section>

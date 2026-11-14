@@ -1,3 +1,5 @@
+import { DataSource } from '../../components/DataSource.jsx';
+import { basketSummary, basketLabel } from './basket.js';
 import { label } from "../../utils/ingredients.js";
 import { mockApi } from "../../services/api/mockApi.js";
 import { StoreCard } from "./StoreCard.jsx";
@@ -16,10 +18,12 @@ export function StoreScreen({
   );
   const merchants = priceData.stores.filter((store) =>
     priceData.offers.some((offer) => offer.store_id === store.id),
-  );
+  ).sort((a, b) => Number(basketSummary(missing, priceData.offers.filter((offer) => offer.store_id === b.id), priceData.demo).complete)
+    - Number(basketSummary(missing, priceData.offers.filter((offer) => offer.store_id === a.id), priceData.demo).complete));
   const hasNeeds = missing.length > 0;
   return (
     <section className="store-screen">
+      <DataSource source={priceData.data_source} />
       <div className="store-heading">
         <div>
           <h2>Pour cuisiner : {recipe.title}</h2>
@@ -27,7 +31,7 @@ export function StoreScreen({
             Les produits trouvés sont à vérifier. Les montants correspondent au prix du paquet complet, pas à la quantité utilisée.
           </p>
         </div>
-        <span className="demo-tag">{priceData.demo ? "PRIX ILLUSTRATIFS" : "PRIX OBSERVÉS"}</span>
+        <span className="demo-tag">{priceData.data_source === "unavailable" ? "Unavailable" : priceData.demo ? "PRIX ILLUSTRATIFS" : "PRIX OBSERVÉS"}</span>
       </div>
       {!hasNeeds && (
         <div className="panel no-purchases">
@@ -66,7 +70,8 @@ export function StoreScreen({
                 key={merchant.id}
                 merchant={merchant}
                 offers={offers}
-                missingCount={missing.length}
+                required={missing}
+                demo={priceData.demo}
                 selected={selectedStore === merchant.id}
                 onSelect={() => setSelectedStore(merchant.id)}
               />
@@ -109,14 +114,15 @@ export function ExportScreen({
   const missing = recipe.match?.missing_ingredients ?? recipe.ingredients.filter(
     (item) => item.essential && !ingredientIds.includes(item.ingredient_id),
   );
-  const offers =
-    priceData?.offers.filter((offer) => offer.store_id === selectedStore) ?? [];
+  const basket = basketSummary(missing, priceData?.offers.filter((offer) => offer.store_id === selectedStore) ?? [], priceData?.demo);
+  const offers = basket.offers;
   const store = priceData?.stores.find((item) => item.id === selectedStore);
   const mapUrl = store?.address
     ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(store.address)}${origin.trim() ? `&origin=${encodeURIComponent(origin.trim())}` : ""}`
     : null;
   return (
     <section className="export-screen">
+      <DataSource source={priceData?.data_source} />
       <div className="export-top">
         <span className="export-check">✓</span>
         <div>
@@ -163,7 +169,7 @@ export function ExportScreen({
         )}
         {selectedStore && offers.length > 0 && (
           <div className="export-total">
-            <span>{offers.length === missing.length ? "Panier complet · coût indicatif" : "Panier incomplet · sous-total indicatif"}</span>
+            <span>{basketLabel(basket)}</span>
             <b>
               {offers
                 .reduce((sum, offer) => sum + Number(offer.price_cad), 0)

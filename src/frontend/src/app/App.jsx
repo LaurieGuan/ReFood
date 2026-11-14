@@ -1,3 +1,5 @@
+import { ApiModeControl } from '../components/ApiModeControl.jsx';
+import { DataSource } from '../components/DataSource.jsx';
 import { PreferencesPanel } from "../features/preferences/PreferencesPanel.jsx";
 import { CandidateEditor } from "../features/scan/CandidateEditor.jsx";
 import { RecipeGrid } from "../features/recipes/RecipeGrid.jsx";
@@ -83,10 +85,14 @@ export function App() {
             {destinations.find((item) => item.id === screen)?.label}
           </span>
           <span className="api-state">
-            <i /> {isDemoMode ? "Démo interactive" : "API Flask"}
+            <i /> {isDemoMode ? "Demo · Sample data" : "Mode Flask API"}
           </span>
         </header>
         <div className="content">
+          <ApiModeControl />
+          {['saved', 'preferences'].includes(screen) && <p><DataSource source="local" /> · Aucune synchronisation MariaDB.</p>}
+          {screen === 'scan' && stage === 1 && scan?.data_source && <DataSource source={scan.data_source} />}
+          {screen === 'scan' && stage > 0 && scan?.pantry_persistence && <p>Ingrédients confirmés : {scan.pantry_persistence === 'mariadb' ? 'sauvegardés dans MariaDB' : scan.pantry_persistence === 'memory' ? 'mémoire serveur uniquement · aucune sauvegarde MariaDB' : 'session de démonstration uniquement'}.</p>}
           <div className="page-heading">
             <div>
               <p className="eyebrow">
@@ -97,7 +103,7 @@ export function App() {
             </div>
           </div>
           {error && (
-            <AlertBanner onDismiss={() => setError("")}>{error}</AlertBanner>
+            <AlertBanner onDismiss={() => setError("")}><DataSource source="unavailable" /> {error}</AlertBanner>
           )}
           {screen === "scan" && (
             <>

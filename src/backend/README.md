@@ -20,7 +20,7 @@ python -m unittest discover -s tests -v
 ```
 `GET /api/v1/health` returns HTTP 200 with `{"status":"ok","service":"refood"}`.
 `create_app(test_config=None)` loads environment settings, then applies test overrides.
-See `.env.example` for local settings. `python app.py` loads `src/backend/.env` automatically. This file is already covered by root `.gitignore`; never commit credentials. `DATABASE_URL` is required for persistent database use; omitting it uses in-memory/demo fallback.
+See `.env.example` for local settings. `python app.py` loads `src/backend/.env` automatically. This file is already covered by root `.gitignore`; never commit credentials. `DATABASE_URL` is required for persistent database use; omitting it keeps confirmed pantry data in process memory only and recipe search/variations return 503. Recipe search never substitutes sample recipes.
 
 ## Add a resource blueprint
 Create `routes/<resource>.py` with a uniquely named Flask `Blueprint`. Import and

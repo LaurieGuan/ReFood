@@ -2,8 +2,8 @@
 
 from importlib import import_module
 
-from flask import Blueprint, request
-from werkzeug.exceptions import BadRequest
+from flask import Blueprint, request, make_response
+from werkzeug.exceptions import BadRequest, ServiceUnavailable
 
 from schemas.prices import GrocerySearchResponse, GroceryProduct
 from .http_utils import json_response
@@ -12,13 +12,13 @@ grocery_bp = Blueprint("grocery", __name__)
 
 
 def search_grocery_products(query: str, limit: int = 10) -> GrocerySearchResponse:
-    """Delegate to Developer 3; the empty mock is explicitly labeled."""
+    """Delegate to the provider; missing services fail explicitly."""
     try:
         service = import_module("services.grocery_prices")
     except ModuleNotFoundError as exc:
         if exc.name != "services.grocery_prices":
             raise
-        return GrocerySearchResponse(query=query, source="mock")
+        raise ServiceUnavailable("Grocery price service is not installed") from exc
     return service.search_grocery_products(query, limit=limit)
 
 
@@ -43,10 +43,14 @@ def search_products():
             raise BadRequest("Unknown or invalid grocery category") from None
     else:
         result = search_grocery_products(query, limit)
-    return json_response(GrocerySearchResponse, result)
+    response = make_response(*json_response(GrocerySearchResponse, result))
+    response.headers["X-Refood-Source"] = response.get_json()["source"]
+    return response
 
 
 @grocery_bp.get("/<product_id>")
 def product_details(product_id):
     service = import_module("services.grocery_prices")
-    return json_response(GroceryProduct, service.get_grocery_product(product_id))
+    response = make_response(*json_response(GroceryProduct, service.get_grocery_product(product_id)))
+    response.headers["X-Refood-Source"] = response.get_json()["provider"]
+    return response

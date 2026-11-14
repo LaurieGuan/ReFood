@@ -1,3 +1,4 @@
+import { DataSource } from '../../components/DataSource.jsx';
 import { label } from "../../utils/ingredients.js";
 import { mockApi } from "../../services/api/mockApi.js";
 
@@ -31,6 +32,7 @@ export function RecipeGrid({ recipes, saved, onOpen, onToggle }) {
               </div>
               <div className="recipe-copy">
                 <h3>{recipe.title}</h3>
+                <DataSource source={recipe.data_source} persistence={recipe.persistence} />
                 {recipe.nutrition?.calories != null && <small>{recipe.nutrition.calories} kcal · source</small>}
                 {!!recipe.preference_warnings?.length && <small>Adéquation alimentaire à vérifier</small>}
                 <p>

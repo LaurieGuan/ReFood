@@ -35,7 +35,8 @@ class PantryFlowTests(unittest.TestCase):
         self.assertEqual([p['ingredient_id'] for p in response.json['items']],['ing_egg','ing_tomato'])
         self.assertEqual(client.get('/api/v1/pantry').json,response.json)
         recipes=client.post('/api/v1/recipes/search',json={'ingredients':response.json['items']})
-        self.assertEqual(recipes.status_code,200)
+        # No configured catalog must fail explicitly, never search sample recipes.
+        self.assertEqual(recipes.status_code,503)
 
     def test_duplicate_and_blank_confirmation(self):
         client=create_app({'TESTING':True,'DATABASE_URL':None}).test_client()

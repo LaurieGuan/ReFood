@@ -1,3 +1,4 @@
+import { isDemoMode } from '../../services/api/apiMode.js';
 import { useEffect, useState } from "react";
 import { mockApi } from "../../services/api/mockApi.js";
 
@@ -25,14 +26,14 @@ export function useRecipeLibrary({ saved, onChanged }) {
   const [busy, setBusy] = useState(false);
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const refresh = async () => {
-    const response = await mockApi.listRecipes();
+    const response = await mockApi.listRecipes({ includeSamples: isDemoMode });
     setItems(response.items);
     await onChanged?.();
   };
   useEffect(() => {
     let alive = true;
     Promise.all([
-      mockApi.listRecipes(),
+      mockApi.listRecipes({ includeSamples: isDemoMode }),
       mockApi.getIngredientCatalog(),
       mockApi.getPreferenceOptions(),
     ])

@@ -3,8 +3,8 @@
 from importlib import import_module
 from uuid import uuid4
 
-from flask import Blueprint, request
-from werkzeug.exceptions import BadRequest, RequestEntityTooLarge, BadGateway
+from flask import Blueprint, request, make_response
+from werkzeug.exceptions import BadRequest, RequestEntityTooLarge, BadGateway, ServiceUnavailable
 
 from schemas.scanning import ScanCandidate, ScanResponse
 from .http_utils import json_response
@@ -14,13 +14,13 @@ MAX_IMAGE_BYTES = 10 * 1024 * 1024
 
 
 def scan_fridge(image_bytes: bytes) -> list[ScanCandidate]:
-    """Call Developer 3's adapter, falling back to a schema-valid demo mock."""
+    """Call the vision adapter; never fabricate candidates."""
     try:
         scanner = import_module("services.vision").scan_fridge
     except ModuleNotFoundError as exc:
         if exc.name != "services.vision":
             raise
-        return []
+        raise ServiceUnavailable("Vision service is not installed") from exc
     return scanner(image_bytes)
 
 
@@ -45,4 +45,6 @@ def create_scan():
     except RuntimeError:
         raise BadGateway("Vision provider unavailable or invalid response; check server configuration and quota") from None
     response = ScanResponse(scan_id=f"scan_{uuid4().hex}", candidates=candidates)
-    return json_response(ScanResponse, response)
+    result = make_response(*json_response(ScanResponse, response))
+    result.headers["X-Refood-Source"] = "vision_provider"
+    return result

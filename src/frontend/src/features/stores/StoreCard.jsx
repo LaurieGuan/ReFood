@@ -1,3 +1,4 @@
+import { basketSummary, basketLabel } from './basket.js';
 import { label } from "../../utils/ingredients.js";
 import { mockApi } from "../../services/api/mockApi.js";
 
@@ -10,11 +11,14 @@ const money = (value) =>
 export function StoreCard({
   merchant,
   offers,
-  missingCount,
+  required,
+  demo,
   selected,
   onSelect,
 }) {
-  const total = offers.reduce((sum, offer) => sum + Number(offer.price_cad), 0);
+  const basket = basketSummary(required, offers, demo);
+  offers = basket.offers;
+  const total = basket.total;
 
   return (
     <label className={`store-card ${selected ? "chosen" : ""}`}>
@@ -46,6 +50,7 @@ export function StoreCard({
               <small>
                 {offer.retailer_link ? <a href={offer.retailer_link} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()}>{offer.product_name}</a> : offer.product_name} {offer.brand ? `· ${offer.brand}` : ""} · {offer.package_quantity ?? "format inconnu"}{" "}
                 {offer.package_unit}
+                <small>{demo ? "Demo · Sample data" : `Source : ${offer.source ?? "inconnue"} · ${offer.observed_at ?? "date inconnue"} · correspondance retenue`}</small>
               </small>
             </span>
             <b>{money(offer.price_cad)}</b>
@@ -54,10 +59,11 @@ export function StoreCard({
       </div>
       <div className="store-total">
         <span>
-          {offers.length === missingCount ? "Panier complet" : "Panier incomplet · sous-total"} ({offers.length}/{missingCount} ingrédients)
+          {basketLabel(basket)} ({basket.covered}/{basket.required} ingrédients)
         </span>
         <b>{money(total)}</b>
       </div>
+      <p>Sans prix dans ce magasin : {basket.missing.map((item) => label(item.name)).join(", ") || "aucun"}</p>
       <small className="store-source">
         {offers[0]?.source ? `Source ${offers[0].source} · prix observés${offers[0].observed_at ? ` le ${new Date(offers[0].observed_at).toLocaleDateString('fr-CA')}` : ''}` : 'Source démo_catalog · valeurs illustratives'}
       </small>
