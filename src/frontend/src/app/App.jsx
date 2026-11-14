@@ -11,11 +11,14 @@ import { usePreferences } from '../hooks/usePreferences.js';
 import { mockApi } from '../services/api/mockApi.js';
 import { label } from '../utils/ingredients.js';
 import { destinations } from './navigation.js';
+import { Login } from '../features/auth/Login.jsx';
 import '../styles/global.css';
 import '../styles/flow.css';
+import '../styles/login.css';
 
 
 export function App() {
+  const [showLogin, setShowLogin] = useState(true);
   const [screen, setScreen] = useState('scan');
   const [location, setLocation] = useState(null);
   const [origin, setOrigin] = useState('');
@@ -83,6 +86,8 @@ export function App() {
   const stageSubtitles = ['Ajoutez une photo, puis confirmez les propositions avant de chercher des recettes.', 'Gardez les bons ingrédients, corrigez les autres ou ajoutez ce qui manque.', 'Des idées à partir des ingrédients que vous avez confirmés.', 'Comparez les offres indicatives pour les ingrédients manquants.', 'Votre liste est prête à télécharger ou à ouvrir dans Maps.'];
   const title = screen === 'scan' ? stageTitles[stage] : ({ saved: 'Mes recettes', preferences: 'Préférences alimentaires' })[screen];
   const subtitle = screen === 'scan' ? stageSubtitles[stage] : ({ saved: 'Créez, modifiez et retrouvez vos recettes et favoris.', preferences: 'Indiquez vos préférences pour guider les suggestions.' })[screen];
+
+  if (showLogin) return <Login onDemo={() => setShowLogin(false)} />;
 
   return <div className="app-shell">
     <aside className="sidebar"><a className="brand" href="#scan" onClick={(e) => { e.preventDefault(); setScreen('scan'); }}><span className="brand-mark">r.</span><span>refood<span className="brand-dot">.</span></span></a><p className="side-caption">VOTRE CUISINE</p><nav>{destinations.map((item) => <button key={item.id} className={`nav-link ${screen === item.id ? 'selected' : ''}`} onClick={() => { setScreen(item.id); setError(''); }}><span className="nav-icon">{item.icon}</span>{item.label}{item.id === 'saved' && saved.length > 0 && <small>{saved.length}</small>}</button>)}</nav><div className="side-note"><span>i</span><p>Confirmez les ingrédients proposés pour trouver des recettes.</p><code>{mockApi.baseUrl}</code></div></aside>
