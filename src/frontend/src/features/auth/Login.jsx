@@ -1,25 +1,18 @@
 import React, { useState } from 'react';
-import { Recaptcha } from './Recaptcha.jsx';
 
 export function Login({ onDemo }) {
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState('');
   const [view, setView] = useState('login');
-  const [captchaToken, setCaptchaToken] = useState('');
 
   function changeView(next) {
     setView(next);
     setMessage('');
     setShowPassword(false);
-    setCaptchaToken('');
   }
 
   function handleSubmit(event) {
     event.preventDefault();
-    if (!captchaToken) {
-      setMessage('Veuillez compléter la vérification reCAPTCHA.');
-      return;
-    }
     const data = new FormData(event.currentTarget);
     if (view === 'register' && data.get('password') !== data.get('confirm_password')) {
       setMessage('Les mots de passe ne correspondent pas.');
@@ -56,7 +49,6 @@ export function Login({ onDemo }) {
           <div className="login-password"><input id="login-password" name="password" type={showPassword ? 'text' : 'password'} placeholder="Votre mot de passe" autoComplete={view === 'register' ? 'new-password' : 'current-password'} minLength={view === 'register' ? 8 : undefined} required /><button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}>{showPassword ? 'Masquer' : 'Afficher'}</button></div></>}
           {view === 'register' && <><label htmlFor="confirm-password">Confirmer le mot de passe</label><input id="confirm-password" name="confirm_password" type={showPassword ? 'text' : 'password'} autoComplete="new-password" minLength={8} required /><small className="login-hint">Au moins 8 caractères.</small></>}
           {view === 'login' && <button className="login-link login-forgot" type="button" onClick={() => changeView('forgot')}>Mot de passe oublié ?</button>}
-          <Recaptcha onChange={setCaptchaToken} />
           {message && <p className="login-message" role="status">{message}</p>}
           <button className="login-submit" type="submit">{view === 'login' ? 'Se connecter' : view === 'register' ? 'Créer mon compte' : 'Réinitialiser le mot de passe'} <span>→</span></button>
         </form>
