@@ -102,7 +102,7 @@ def main():
                 for row in rows:
                     recipe = extract(row, row.get("row_idx", offset))
                     if recipe:
-                        output.write(json.dumps(recipe, ensure_ascii=False, separators=(",", ":")) + "\\n")
+                        output.write(json.dumps(recipe, ensure_ascii=False, separators=(",", ":")) + "\n")
                         kept += 1
                     else:
                         dropped += 1
