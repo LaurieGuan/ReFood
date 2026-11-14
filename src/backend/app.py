@@ -20,4 +20,7 @@ def create_app(test_config=None):
 
 
 if __name__ == "__main__":
+    # Interactive setup is only for direct local launch, never tests/imports.
+    from local_setup import configure_local_environment
+    configure_local_environment()
     create_app().run()
