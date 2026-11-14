@@ -35,3 +35,11 @@ P2: budget/prices/preferences.
 P3: barter marketplace, nutrition extras, maps.
 
 If blocked on another developer's implementation, use schema-valid mocks behind the agreed interface and identify the mock clearly. Avoid making a second incompatible implementation of your teammate's component.
+
+## Updated shared decision: recipe enrichment + substitutions (2026-11-14)
+- Read `docs/obsidian/Recipe Enrichment and Substitutions.md` before implementing recipes, grocery data or swaps.
+- Dataset is `rahul7star/food-recipes`; import text-only samples, do not download image-heavy dataset indiscriminately.
+- Source metadata has been added to `schemas/recipes.py` as **optional** fields; `schemas/prices.py` already contains grocery product/offer data. Reuse these shared models. New `schemas/substitutions.py` contains suggested swaps and confirmed recipe variations.
+- Don't change actual source recipe ingredients/steps after a user swap. Show an explicit user-approved variation; recompute missing items; original nutrition/instructions may no longer apply.
+- The source/category enum from teammates is unverified against the live Épiceries.ca categories endpoint. Verify before strict filtering.
+- Dev 1 & Dev 2 have existing feature branch work. They must **integrate new main into their branch**, not discard or regenerate their first prompt's work. Dev 3 starts own integration branch from updated main. Never force-push/reset other people's branches.
