@@ -4,6 +4,9 @@ status: proposed
 ---
 # Backend Architecture
 
+## Mandatory first step: shared bootstrap on main
+Before branching, follow [[Shared Backend Bootstrap]] to establish the Flask app factory, shared request validation and error conventions, internal adapter signatures, config, smoke test, and branch ownership. This is a **plan**, not yet implemented Python code. Merge the working bootstrap into `main`, then create `feature/api`, `feature/database`, and `feature/integrations` from the same commit.
+
 ## Responsibilities
 | Owner | Area | Files to implement |
 | --- | --- | --- |
@@ -31,4 +34,4 @@ Developer 1 initially owns the shared `schemas/` contracts, but **all three must
 - No empty directories in Git: README files are intentional placeholders.
 
 ## Linked notes
-[[Pydantic v2 Guide]] · [[Preferences]] · [[Prices]] · [[Marketplace]] · [[Contracts and Decisions]]
+[[Shared Backend Bootstrap]] · [[Pydantic v2 Guide]] · [[Preferences]] · [[Prices]] · [[Marketplace]] · [[Contracts and Decisions]]
