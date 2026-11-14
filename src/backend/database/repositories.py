@@ -89,7 +89,10 @@ _mariadb = MariaDBPantryRepository()
 
 def _repository():
     # A configured-but-broken database must fail visibly, never silently lose data.
-    return _mariadb if os.environ.get("DATABASE_URL") else _memory
+    if os.environ.get("DATABASE_URL"):
+        from .catalog import SQLRepository
+        return SQLRepository()
+    return _memory
 
 
 def get_pantry(user_id: str) -> PantryResponse:

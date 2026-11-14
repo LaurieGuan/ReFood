@@ -108,4 +108,29 @@ def match_recipes(request: RecipeSearchRequest, recipes: list[Recipe]) -> list[R
 
 
 def find_recipes(request: RecipeSearchRequest) -> list[RecipeMatch]:
+    import os
+    if os.environ.get("DATABASE_URL"):
+        from database.catalog import get_recipes
+        return match_recipes(request, get_recipes())
     return match_recipes(request, sample_recipes())
+
+
+def apply_swaps(recipe, swaps, pantry):
+    """Apply confirmed swaps to a copy, never to the persisted source recipe."""
+    from schemas.substitutions import RecipeVariationResponse
+    updated = recipe.model_copy(deep=True)
+    originals = {item.ingredient_id for item in recipe.ingredients}
+    selected = {}
+    for swap in swaps:
+        key = swap.original_ingredient_id
+        if key not in originals or key in selected:
+            raise ValueError("Unknown or duplicate swap ingredient ID")
+        selected[key] = swap.replacement
+    updated.ingredients = [selected.get(item.ingredient_id, item).model_copy(deep=True)
+                           for item in recipe.ingredients]
+    results = match_recipes(RecipeSearchRequest(ingredients=pantry), [updated])
+    return RecipeVariationResponse(original_recipe_id=recipe.recipe_id,
+        updated_ingredients=updated.ingredients,
+        missing_ingredients=results[0].missing_ingredients if results else [],
+        instructions_need_review=bool(swaps), nutrition_needs_recalculation=bool(swaps),
+        warnings=["Review cooking instructions, nutrition and allergens after substitutions."] if swaps else [])
