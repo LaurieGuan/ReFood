@@ -52,3 +52,15 @@ Act as Developer 3 (external data integrations). Read AGENTS.md, the bootstrap n
 `MyModel.model_validate(incoming_dict)` validates and parses. `model_dump(mode="json")` creates JSON-safe Python objects. `model_json_schema()` exports a schema for a frontend teammate. Pydantic does not create Flask routes or SQL tables.
 
 See [[Pydantic v2 Guide]].
+
+
+## Update: existing branches and second-phase prompts
+**Use [[Recipe Enrichment and Substitutions]] for all new work.** Dev 1 completed first API prompt; Dev 2 completed first DB/matcher prompt but has NOT run its database/Docker second prompt; Dev 3 has NOT run first integration prompt. Do not restart previous tasks. Both existing branches are behind main and should merge `origin/main` after committing or stashing local work. Main now has extended optional recipe metadata and shared substitutions schema.
+
+**Dev 1 follow-up (on feature/api only):** Read AGENTS.md, [[Recipe Enrichment and Substitutions]], existing route files and new schemas. Preserve tested routes and their mocks. Add provider-backed missing ingredient product search endpoint only after Dev 3 adapter exists; add `POST /api/v1/recipes/substitutions` and `POST /api/v1/recipes/variations` using the shared models, with schema-valid mocks if service isn't implemented. Keep confirmation in frontend; routes never silently mutate the source recipe or pantry. Add tests. Coordinate internal function signatures; no shared schema edits.
+
+**Dev 2 follow-up (on feature/database only):** Read AGENTS.md, [[Recipe Enrichment and Substitutions]], preserve existing matcher and pantry repositories/tests. Implement Docker Compose MariaDB + persistence/recipe upsert using `save_recipes(recipes: list[Recipe]) -> int` and fetch methods. Store optional recipe metadata and source IDs without changing shared schemas. If time, implement pure recipe variation apply/recompute helper; then optional grocery product/offer cache using the existing prices schema. Do not create a second independent importer or rewrite matcher unnecessarily. Avoid requiring DB at startup. Coordinate shared dependencies/config changes first.
+
+**Dev 3 first prompt (on feature/integrations only):** Read AGENTS.md, [[Recipe Enrichment and Substitutions]], dataset/price notes and real schemas. Implement normalized text-only subset of `rahul7star/food-recipes`, stable canonical IDs, recipe import returning `list[Recipe]`, fixture tests. Implement vision image → `ScanCandidate` with uncertainty and no auto-persist. Implement Épiceries.ca search/detail adapter mapped to **existing** `schemas/prices.py`; verify category ID taxonomy live and don't hardcode unchecked enum as truth. For substitutions, implement source-agnostic candidate suggestion from confirmed pantry first, optional grocery alternatives later. Don't alter routes, DB or shared schemas.
+
+Refer to the role prompts in this conversation/coordination for exact acceptance tests. Never have multiple Codex agents modify shared files in parallel.
