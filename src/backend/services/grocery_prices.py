@@ -5,7 +5,7 @@ import time
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from urllib.parse import urlencode
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 from schemas.prices import GroceryProduct, GrocerySearchResponse, StorePrice, UnitPrice
 
 _CACHE = {}
@@ -66,7 +66,11 @@ def _request(**params):
     if cached and time.monotonic() - cached[0] < 300:
         return copy.deepcopy(cached[1])
     try:
-        with urlopen(url, timeout=15) as response:
+        request = Request(url, headers={
+            'User-Agent': 'REFOOD-Hackathon/0.1',
+            'Accept': 'application/json',
+        })
+        with urlopen(request, timeout=15) as response:
             payload = json.load(response)
         if payload.get('ok') is not True or not isinstance(payload.get('data'), dict):
             raise ValueError('Unsuccessful provider envelope')
