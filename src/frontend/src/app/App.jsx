@@ -1,4 +1,7 @@
 import React, { useMemo, useState } from 'react';
+import { CandidateEditor } from '../features/scan/CandidateEditor.jsx';
+import { RecipeGrid } from '../features/recipes/RecipeGrid.jsx';
+import { RecipeDetails } from '../features/recipes/RecipeDetails.jsx';
 import { useScanSession } from '../hooks/useScanSession.js';
 import { useFavorites } from '../hooks/useFavorites.js';
 import { usePreferences } from '../hooks/usePreferences.js';

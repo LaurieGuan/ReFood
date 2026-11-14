@@ -46,7 +46,7 @@
                 "searchQuery": ""
               },
               "icon": "lucide-folder-closed",
-              "title": "Files"
+              "title": "Explorateur de fichiers"
             }
           },
           {
@@ -179,18 +179,52 @@
   },
   "left-ribbon": {
     "hiddenItems": {
-      "switcher:Open quick switcher": false,
-      "graph:Open graph view": false,
-      "canvas:Create new canvas": false,
-      "daily-notes:Open today's daily note": false,
-      "templates:Insert template": false,
-      "command-palette:Open command palette": false,
-      "bases:Create new base": false
+      "switcher:Ouvrir le sélecteur rapide": false,
+      "graph:Ouvrir la vue graphique": false,
+      "canvas:Créer un nouveau canvas": false,
+      "daily-notes:Ouvrir la note quotidienne": false,
+      "templates:Insérer le modèle": false,
+      "command-palette:Ouvrir la palette de commandes": false,
+      "bases:Créer une nouvelle base": false
     }
   },
   "active": "d9a2f4d494b6d1e2",
   "lastOpenFiles": [
-    "REFOOD_API_CONTRACT.md",
-    "Welcome.md"
+    "src/frontend/dist/assets/index-BFjTwf4F.js",
+    "src/frontend/src/hooks/useScanSession.js",
+    "src/frontend/dist/assets/index-CUSHaQA_.js",
+    "src/frontend/dist/assets/index-CCAuUNgT.js",
+    "src/frontend/dist/assets/index-XTzIZrYW.css",
+    "src/frontend/src/styles/flow.css",
+    "src/frontend/dist/assets/index-mncZy_7d.js",
+    "src/frontend/dist/assets/index-D6RoSu5J.js",
+    "src/frontend/src/features/recipes/RecipeDetails.jsx",
+    "src/frontend/src/features/recipes/RecipeGrid.jsx",
+    "src/frontend/src/features/scan/CandidateEditor.jsx",
+    "src/frontend/node_modules/@vitejs/plugin-react/README.md",
+    "src/frontend/node_modules/@types/estree/README.md",
+    "src/frontend/node_modules/@types/babel__traverse/README.md",
+    "src/frontend/node_modules/@types/babel__template/README.md",
+    "src/frontend/node_modules/@types/babel__generator/README.md",
+    "src/frontend/node_modules/@types/babel__core/README.md",
+    "src/frontend/node_modules/@rollup/rollup-darwin-arm64/README.md",
+    "src/frontend/node_modules/@rolldown/pluginutils/README.md",
+    "src/frontend/node_modules/@jridgewell/trace-mapping/README.md",
+    "src/frontend/node_modules/@jridgewell/sourcemap-codec/README.md",
+    "src/frontend/node_modules/@jridgewell/resolve-uri/README.md",
+    "src/frontend/node_modules/@jridgewell/remapping/README.md",
+    "src/frontend/node_modules/@jridgewell/gen-mapping/README.md",
+    "src/frontend/node_modules/@esbuild/darwin-arm64/README.md",
+    "src/frontend/node_modules/@babel/types/README.md",
+    "src/frontend/node_modules/@babel/traverse/README.md",
+    "src/frontend/node_modules/@babel/template/README.md",
+    "src/frontend/node_modules/@babel/plugin-transform-react-jsx-source/README.md",
+    "src/frontend/node_modules/@babel/plugin-transform-react-jsx-self/README.md",
+    "src/frontend/node_modules/@babel/parser/README.md",
+    "src/frontend/node_modules/@babel/parser/CHANGELOG.md",
+    "src/frontend/node_modules/@babel/helpers/README.md",
+    "src/frontend/node_modules/@babel/helper-validator-option/README.md",
+    "src/frontend/node_modules/@babel/helper-validator-identifier/README.md",
+    "src/frontend/node_modules/@babel/helper-string-parser/README.md"
   ]
 }
