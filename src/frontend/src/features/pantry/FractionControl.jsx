@@ -15,7 +15,7 @@ export function FractionControl({ name, value, onChange, disabled = false }) {
     <div className="fraction-control">
       <label>
         <span>
-          Quantité restante : <strong>{text}</strong>
+          Contenant restant : <strong>{text}</strong>
         </span>
         <input
           type="range"
@@ -24,7 +24,7 @@ export function FractionControl({ name, value, onChange, disabled = false }) {
           step="0.25"
           value={value ?? 1}
           disabled={disabled}
-          aria-label={`Quantité restante de ${name}`}
+          aria-label={`Fraction restante du contenant de ${name}`}
           aria-valuetext={text}
           onChange={(event) => onChange(Number(event.target.value))}
         />
@@ -42,7 +42,7 @@ export function FractionControl({ name, value, onChange, disabled = false }) {
         disabled={disabled}
         onClick={() => onChange(value == null ? 1 : null)}
       >
-        {value == null ? "Préciser la quantité (plein)" : "Quantité inconnue"}
+        {value == null ? "Préciser le niveau (plein)" : "Niveau inconnu"}
       </button>
     </div>
   );

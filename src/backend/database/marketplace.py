@@ -10,7 +10,7 @@ from schemas.marketplace import (ExchangeOffer, ExchangeProposal, OfferCreateReq
     OfferListResponse, OfferStatus, ProposalCreateRequest, ProposalListResponse, ProposalStatus)
 from .engine import get_engine
 from .orm_models import (MarketplaceLockRow, ExchangeOfferRow, ExchangeProposalRow,
-                        ExchangeReservationRow, PantryInventoryRow)
+                        ExchangeReservationRow, PantryInventoryRow, TradeNotificationRow)
 from .repositories import _validate_user
 from .errors import MarketplaceError
 
@@ -220,6 +220,12 @@ class MarketplaceRepository:
                     offer.status = OfferStatus.RESERVED
                     self._save_offer(session, offer)
                 proposal.status = ProposalStatus.ACCEPTED
+                # Write both intents in the same transaction, with no address or delivery.
+                # Repeated accept returns above, so no duplicate intents are created.
+                for recipient_id in (proposal.target_owner_id, proposal.proposer_id):
+                    session.add(TradeNotificationRow(proposal_id=proposal.proposal_id,
+                        recipient_id=recipient_id, payload=proposal.model_dump(mode="json"),
+                        status="pending", attempts=0))
                 self._reject_competing(session, {o.offer_id for o in offers}, proposal.proposal_id)
             elif action == "reject":
                 proposal.status = ProposalStatus.REJECTED

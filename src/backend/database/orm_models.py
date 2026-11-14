@@ -106,3 +106,13 @@ class DonationReservationRow(Base):
     quantity = Column(Integer, nullable=False)
     status = Column(String(20), nullable=False)
     payload = Column(JSON, nullable=False)
+
+
+class TradeNotificationRow(Base):
+    """Durable notification intent; participant addresses are resolved at delivery."""
+    __tablename__ = "trade_notifications"
+    proposal_id = Column(String(191), ForeignKey("marketplace_proposals.proposal_id"), primary_key=True)
+    recipient_id = Column(String(191), primary_key=True)
+    payload = Column(JSON, nullable=False)
+    status = Column(String(20), nullable=False, default="pending")
+    attempts = Column(Integer, nullable=False, default=0)

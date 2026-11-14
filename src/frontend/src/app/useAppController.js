@@ -7,6 +7,8 @@ import { mockApi } from "../services/api/mockApi.js";
 import { matchesPreferences } from "../features/preferences/recipeFilters.js";
 import { label } from "../utils/ingredients.js";
 
+const hasStock = (item) => item.remaining_fraction !== 0 && item.quantity !== 0;
+
 export function useAppController() {
   const [showLogin, setShowLogin] = useState(true);
   const [screen, setScreen] = useState("scan");
@@ -39,7 +41,7 @@ export function useAppController() {
   const ingredientIds = useMemo(
     () =>
       scan?.confirmedItems
-        ?.filter((item) => item.remaining_fraction !== 0)
+        ?.filter(hasStock)
         .map((item) => item.ingredient_id)
         .filter(Boolean) ?? [],
     [scan],
@@ -82,14 +84,17 @@ export function useAppController() {
       setLoading(false);
     }
   };
+  const startManual = () => {
+    setError("");
+    setScan({ scan_id: `manual_${Date.now()}`, candidates: [], warnings: [] });
+    setStage(1);
+  };
   const getRecipes = async (confirmedItems) => {
     setLoading(true);
     setError("");
     try {
       await api.savePantry(confirmedItems);
-      const response = await api.searchRecipes(
-        confirmedItems.filter((item) => item.remaining_fraction !== 0), 100, preferences ?? {},
-      );
+      const response = await api.searchRecipes(confirmedItems.filter(hasStock), 100, preferences ?? {});
       setScan({ ...scan, confirmedItems });
       setSuggestions(isDemoMode ? response.recipes : response.recipes.filter((recipe) => matchesPreferences(recipe, preferences ?? {})));
       setStage(2);
@@ -121,7 +126,7 @@ export function useAppController() {
     let selected = recipe;
     try {
       if (!isDemoMode && recipe.recipe_id && screen !== "scan") {
-        const confirmed = scan?.confirmedItems?.filter((item) => item.remaining_fraction !== 0) ?? [];
+        const confirmed = scan?.confirmedItems?.filter(hasStock) ?? [];
         const refreshed = await api.searchRecipes(confirmed, 100);
         selected = refreshed.recipes.find((item) => item.id === recipe.id) ?? { ...recipe, match: { ...recipe.match, missing_ingredients: recipe.ingredients } };
       }
@@ -280,7 +285,7 @@ export function useAppController() {
   const title =
     screen === "scan"
       ? stageTitles[stage]
-      : { saved: "Mes recettes", preferences: "Préférences alimentaires" }[
+      : { saved: "Mes recettes", preferences: "Préférences alimentaires", donations: "Offres des commerces", marketplace: "Troc d’ingrédients" }[
           screen
         ];
   const subtitle =
@@ -289,6 +294,8 @@ export function useAppController() {
       : {
           saved: "Créez, modifiez et retrouvez vos recettes et favoris.",
           preferences: "Indiquez vos préférences pour guider les suggestions.",
+          donations: "Consultez et réservez les offres des commerces.",
+          marketplace: "Échangez des ingrédients avec les autres utilisateurs de démonstration.",
         }[screen];
 
   return {
@@ -319,6 +326,7 @@ export function useAppController() {
     toast,
     ingredientIds,
     runScan,
+    startManual,
     getRecipes,
     openRecipe,
     chooseRecipe,

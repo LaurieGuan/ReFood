@@ -3,6 +3,8 @@
 Identity, stock availability and state transitions must be checked by services.
 Schema validation alone never confirms ownership or reserves inventory.
 """
+import base64
+import binascii
 from datetime import datetime, timezone
 from enum import Enum
 from math import isfinite
@@ -37,6 +39,27 @@ TradeItem = Annotated[IngredientWithQuantity, AfterValidator(_trade_item)]
 UTCTimestamp = Annotated[AwareDatetime, AfterValidator(lambda value: value.astimezone(timezone.utc))]
 
 
+def _offer_photo(value: str | None) -> str | None:
+    if value is None:
+        return None
+    prefixes = {"data:image/jpeg;base64,": b"\xff\xd8\xff", "data:image/png;base64,": b"\x89PNG\r\n\x1a\n", "data:image/webp;base64,": b"RIFF"}
+    prefix = next((key for key in prefixes if value.startswith(key)), None)
+    if prefix is None or len(value) > 700000:
+        raise ValueError("Photo must be a JPEG, PNG or WebP of at most 512 KiB")
+    try:
+        data = base64.b64decode(value[len(prefix):], validate=True)
+    except (ValueError, binascii.Error) as exc:
+        raise ValueError("Invalid photo encoding") from exc
+    if len(data) > 512 * 1024 or not data.startswith(prefixes[prefix]):
+        raise ValueError("Invalid photo or photo exceeds 512 KiB")
+    if prefix == "data:image/webp;base64," and data[8:12] != b"WEBP":
+        raise ValueError("Invalid WebP photo")
+    return value
+
+
+OfferPhoto = Annotated[str | None, AfterValidator(_offer_photo)]
+
+
 class OfferStatus(str, Enum):
     OPEN = "open"
     RESERVED = "reserved"
@@ -57,6 +80,7 @@ class OfferCreateRequest(BaseModel):
     item: TradeItem
     description: str | None = Field(default=None, max_length=1000)
     meeting_area: MeetingArea
+    photo_data_url: OfferPhoto = None
 
 
 class ExchangeOffer(BaseModel):
@@ -65,6 +89,7 @@ class ExchangeOffer(BaseModel):
     item: TradeItem
     description: str | None = Field(default=None, max_length=1000)
     meeting_area: MeetingArea
+    photo_data_url: OfferPhoto = None
     status: OfferStatus
     created_at: UTCTimestamp
 
