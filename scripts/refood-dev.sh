@@ -75,6 +75,8 @@ cd "$BACKEND"
 say "Initializing application database..."
 "$PYTHON" -m database.engine
 say "Running all unit + live MariaDB tests..."
-"$PYTHON" -m unittest discover -s tests -v
+# Fixture-based unit tests must not read the persistent application catalog.
+# TEST_DATABASE_URL remains set so the opt-in MariaDB test still runs.
+env -u DATABASE_URL "$PYTHON" -m unittest discover -s tests -v
 say "Success. Both databases are ready."
 printf '\nTo start Flask:\n  cd %q\n  source .venv/bin/activate\n  export DATABASE_URL=%q\n  python app.py\n' "$BACKEND" "$DATABASE_URL"
