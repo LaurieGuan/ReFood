@@ -76,6 +76,9 @@ class SQLRepository:
         _validate_user(user_id)
         request = PantryUpdateRequest.model_validate(request.model_dump(mode="json"))
         with Session(self.engine) as session, session.begin():
+            from .marketplace import lock_marketplace, check_reserved_stock
+            lock_marketplace(session)
+            check_reserved_stock(session, user_id, request.items)
             session.execute(delete(PantryInventoryRow).where(PantryInventoryRow.user_id == user_id))
             for position, item in enumerate(request.items):
                 self._ingredient(session, item)

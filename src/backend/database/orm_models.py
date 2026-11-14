@@ -56,3 +56,35 @@ class StorePriceRow(Base):
     provider_product_id = Column(String(191), primary_key=True)
     store = Column(String(191), primary_key=True)
     payload = Column(JSON, nullable=False)
+
+
+class MarketplaceLockRow(Base):
+    __tablename__ = "marketplace_lock"
+    lock_id = Column(Integer, primary_key=True)
+    revision = Column(Integer, nullable=False, default=0)
+
+
+class ExchangeOfferRow(Base):
+    __tablename__ = "marketplace_offers"
+    offer_id = Column(String(191), primary_key=True)
+    owner_id = Column(String(191), nullable=False, index=True)
+    status = Column(String(20), nullable=False, index=True)
+    payload = Column(JSON, nullable=False)
+
+
+class ExchangeProposalRow(Base):
+    __tablename__ = "marketplace_proposals"
+    proposal_id = Column(String(191), primary_key=True)
+    target_offer_id = Column(String(191), ForeignKey("marketplace_offers.offer_id"), nullable=False)
+    proposer_offer_id = Column(String(191), ForeignKey("marketplace_offers.offer_id"), nullable=False)
+    status = Column(String(20), nullable=False, index=True)
+    payload = Column(JSON, nullable=False)
+
+
+class ExchangeReservationRow(Base):
+    __tablename__ = "marketplace_reservations"
+    proposal_id = Column(String(191), ForeignKey("marketplace_proposals.proposal_id"), primary_key=True)
+    user_id = Column(String(191), primary_key=True)
+    ingredient_id = Column(String(191), ForeignKey("ingredients.ingredient_id"), nullable=False)
+    amount = Column(Float, nullable=False)
+    unit = Column(String(20), nullable=False)

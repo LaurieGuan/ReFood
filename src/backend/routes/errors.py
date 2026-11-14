@@ -5,6 +5,7 @@ from werkzeug.exceptions import HTTPException
 
 from schemas.common import ErrorResponse
 from .http_utils import RequestValidationError
+from database.errors import MarketplaceError
 
 
 def error_response(code, message, status, details=None):
@@ -15,6 +16,10 @@ def error_response(code, message, status, details=None):
 
 
 def register_error_handlers(app):
+    @app.errorhandler(MarketplaceError)
+    def marketplace_error(exc):
+        return error_response(exc.code, exc.message, exc.status)
+
     @app.errorhandler(RequestValidationError)
     def invalid_request(exc):
         return error_response(

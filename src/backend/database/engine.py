@@ -15,8 +15,8 @@ def _engine(url):
     return create_engine(parsed, pool_pre_ping=True, connect_args=options)
 
 
-def get_engine():
-    url = os.environ.get("DATABASE_URL")
+def get_engine(url=None):
+    url = url or os.environ.get("DATABASE_URL")
     if not url:
         raise ValueError("Set DATABASE_URL to use durable storage")
     return _engine(url)

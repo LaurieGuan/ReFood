@@ -5,6 +5,7 @@ from .grocery import grocery_bp
 from .pantry import pantry_bp
 from .recipes import recipes_bp
 from .scans import scans_bp
+from .marketplace import marketplace_bp
 
 
 def register_blueprints(app):
@@ -13,3 +14,4 @@ def register_blueprints(app):
     app.register_blueprint(recipes_bp, url_prefix="/api/v1/recipes")
     app.register_blueprint(scans_bp, url_prefix="/api/v1/scans")
     app.register_blueprint(pantry_bp, url_prefix="/api/v1/pantry")
+    app.register_blueprint(marketplace_bp, url_prefix="/api/v1/marketplace")
