@@ -10,7 +10,35 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-This commit defines **contracts and the directory skeleton only**. It does not yet provide a runnable Flask server or database migrations.
+The shared Flask foundation runs without database connectivity or external API keys.
+
+## Run and test
+From `src/backend`, with the virtual environment activated:
+```bash
+python app.py
+python -m unittest discover -s tests -v
+```
+`GET /api/v1/health` returns HTTP 200 with `{"status":"ok","service":"refood"}`.
+`create_app(test_config=None)` loads environment settings, then applies test overrides.
+See `.env.example` for supported variables; export them in your shell (the file is
+not automatically loaded). `DATABASE_URL` is optional and reserved for later use.
+
+## Add a resource blueprint
+Create `routes/<resource>.py` with a uniquely named Flask `Blueprint`. Import and
+register it explicitly in `routes/__init__.py` using `/api/v1/<resource>` as the
+prefix; define resource-relative paths inside the module. Register only implemented
+routes. Keep service and database initialization out of imports and the factory.
+
+Use `validate_request(RequestModel)` from `routes.http_utils` for JSON requests,
+then call the service and return `json_response(ResponseModel, result)`.
+These helpers use `model_validate` and `model_dump(mode="json")`.
+Missing/non-JSON or malformed bodies return 400; request schema failures return
+422. Response validation failures return a private 500, because they are server
+errors. Central errors follow the existing `ErrorResponse` schema:
+`{"error":{"code":"VALIDATION_ERROR","message":"Invalid request","details":{"errors":[]}}}`.
+Other HTTP errors (including 404 and 405) also return JSON. Unexpected errors use
+`INTERNAL_SERVER_ERROR` and `details: null` without exposing exception text.
+Health checks only confirm that the Flask application is running.
 
 - `schemas/`: shared Pydantic v2 models (architecture/contract owner: Developer 1; agreed by all)
 - `routes/`: HTTP endpoints / Flask (Developer 1)
