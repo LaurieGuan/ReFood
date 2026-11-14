@@ -25,14 +25,16 @@ let recipes = [
 let preferences = { dietary_restrictions: [], excluded_ingredient_ids: [], allergens: [], intolerances: [], nutrition_limits: {}, max_budget_cad: null, max_minutes: null, servings: 2 };
 try { preferences = { ...preferences, ...JSON.parse(localStorage.getItem('refood-preferences') || '{}') }; } catch { /* Storage is optional. */ }
 let favorites = [];
+let favoriteSnapshots = {};
 // Persist user-created recipes and saved selections in the mock service.
 try {
   const stored = JSON.parse(localStorage.getItem('refood-recipes') || 'null');
   if (Array.isArray(stored?.recipes)) recipes = stored.recipes;
   if (Array.isArray(stored?.favorites)) favorites = stored.favorites;
+  if (stored?.favoriteSnapshots && typeof stored.favoriteSnapshots === 'object') favoriteSnapshots = stored.favoriteSnapshots;
 } catch { /* Storage is optional in the mock environment. */ }
 function persistRecipes() {
-  try { localStorage.setItem('refood-recipes', JSON.stringify({ recipes, favorites })); } catch { /* Keep the in-memory session usable. */ }
+  try { localStorage.setItem('refood-recipes', JSON.stringify({ recipes, favorites, favoriteSnapshots })); } catch { /* Keep the in-memory session usable. */ }
 }
 
 
@@ -74,9 +76,9 @@ export const mockApi = {
     recipes = recipes.filter((item) => item.id !== id); favorites = favorites.filter((item) => item !== id);
     persistRecipes(); return wait({ deleted: true });
   },
-  async getFavorites() { return wait({ items: favorites.map((id) => recipes.find((item) => item.id === id)).filter(Boolean) }); },
-  async favoriteRecipe(id) { if (!recipes.some((item) => item.id === id)) throw new Error('Recette introuvable.'); if (!favorites.includes(id)) favorites.push(id); persistRecipes(); return wait({ recipe_id: id, favorite: true }); },
-  async unfavoriteRecipe(id) { favorites = favorites.filter((favoriteId) => favoriteId !== id); persistRecipes(); return wait({ recipe_id: id, favorite: false }); },
+  async getFavorites() { return wait({ items: favorites.map((id) => recipes.find((item) => item.id === id) ?? favoriteSnapshots[id]).filter(Boolean) }); },
+  async favoriteRecipe(id, recipe) { if (!recipes.some((item) => item.id === id) && !recipe) throw new Error('Recette introuvable.'); if (recipe) favoriteSnapshots[id] = recipe; if (!favorites.includes(id)) favorites.push(id); persistRecipes(); return wait({ recipe_id: id, favorite: true }); },
+  async unfavoriteRecipe(id) { favorites = favorites.filter((favoriteId) => favoriteId !== id); delete favoriteSnapshots[id]; persistRecipes(); return wait({ recipe_id: id, favorite: false }); },
   async getPreferenceOptions() { return wait(preferenceOptions); },
   async getIngredientCatalog() { return wait({ items: catalog }); },
   async createIngredient(name) {

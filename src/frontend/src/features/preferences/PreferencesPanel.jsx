@@ -34,7 +34,7 @@ export function PreferencesPanel({ preferences, onSave, loading, saved }) {
       <div className="section-heading">
         <div>
           <h2>Ce qui vous convient</h2>
-          <p>Ces préférences filtrent votre prochaine recherche.</p>
+          <p>Ces préférences sont conservées sur cet appareil et filtrent votre prochaine recherche.</p>
         </div>
       </div>
       <form onSubmit={submit} className="preferences-form">

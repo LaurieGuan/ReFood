@@ -5,7 +5,7 @@ export function useFavorites() {
   useEffect(() => { mockApi.getFavorites().then(({ items }) => setSaved(items)).catch(() => {}); }, []);
   const toggleSaved = useCallback(async (recipe) => {
     if (saved.some((item) => item.id === recipe.id)) await mockApi.unfavoriteRecipe(recipe.id);
-    else await mockApi.favoriteRecipe(recipe.id);
+    else await mockApi.favoriteRecipe(recipe.id, recipe);
     setSaved((await mockApi.getFavorites()).items);
   }, [saved]);
   return { saved, setSaved, toggleSaved };

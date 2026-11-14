@@ -11,6 +11,7 @@ import { StoreScreen, ExportScreen } from "../features/stores/StoreScreens.jsx";
 import { Login } from "../features/auth/Login.jsx";
 import { PhotoPicker } from "../features/scan/PhotoPicker.jsx";
 import { mockApi } from "../services/api/mockApi.js";
+import { isDemoMode } from "../services/api/flaskApi.js";
 import "../styles/global.css";
 import "../styles/flow.css";
 import "../styles/login.css";
@@ -79,7 +80,7 @@ export function App() {
             {destinations.find((item) => item.id === screen)?.label}
           </span>
           <span className="api-state">
-            <i /> Démo interactive
+            <i /> {isDemoMode ? "Démo interactive" : "API Flask"}
           </span>
         </header>
         <div className="content">
@@ -132,8 +133,7 @@ export function App() {
                         <div>
                           <h2>Ajoutez des photos de vos aliments</h2>
                           <p>
-                            Choisissez une image : la démo renvoie des
-                            propositions prédéfinies à vérifier.
+                            Choisissez une image et vérifiez les aliments détectés.
                           </p>
                         </div>
                       </div>
@@ -213,9 +213,7 @@ export function App() {
                     onToggle={toggleSaved}
                   />
                   <div className="results-footnote">
-                    Les filtres utilisent des données de démonstration ; le
-                    budget concerne la recette entière. Vérifiez les quantités
-                    et les informations alimentaires avant de cuisiner.
+                    Les préférences sont appliquées localement. Les données inconnues ne satisfont pas les filtres actifs. Vérifiez les quantités et les informations alimentaires avant de cuisiner.
                   </div>
                 </>
               )}
@@ -223,7 +221,7 @@ export function App() {
                 (loading ? (
                   <WaitPanel
                     title="Comparaison des magasins"
-                    detail="Recherche des offres de démonstration…"
+                    detail="Recherche des offres…"
                   />
                 ) : !priceData ? (
                   <section className="panel">
@@ -311,7 +309,7 @@ function WaitPanel({ title, detail }) {
       />
       <h2>{title}</h2>
       <p>{detail}</p>
-      <small>Cette démo utilise un délai simulé.</small>
+      {isDemoMode && <small>Cette démo utilise un délai simulé.</small>}
     </section>
   );
 }

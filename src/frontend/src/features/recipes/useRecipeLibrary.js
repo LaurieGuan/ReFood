@@ -150,9 +150,8 @@ export function useRecipeLibrary({ saved, onChanged }) {
       setBusy(false);
     }
   };
-  const visible = onlyFavorites
-    ? items.filter((item) => saved.some((favorite) => favorite.id === item.id))
-    : items;
+  const allItems = [...items, ...saved.filter((favorite) => !items.some((item) => item.id === favorite.id))];
+  const visible = onlyFavorites ? allItems.filter((item) => saved.some((favorite) => favorite.id === item.id)) : allItems;
   const changeIngredient = (index, patch) =>
     setEditor({
       ...editor,
