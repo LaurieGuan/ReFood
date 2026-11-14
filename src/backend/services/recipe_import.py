@@ -92,7 +92,8 @@ def import_jsonl_gzip(path, repository, *, batch_size=200, rejection_file=None):
         raise ValueError('batch_size must be 1–1000')
     stats = {'read': 0, 'accepted': 0, 'rejected': 0, 'upserted': 0}
     batch = {}
-    with gzip.open(path, 'rt', encoding='utf-8') as source:
+    opener = gzip.open if str(path).endswith('.gz') else open
+    with opener(path, 'rt', encoding='utf-8') as source:
         for line_number, line in enumerate(source, 1):
             stats['read'] += 1
             try:
@@ -119,6 +120,7 @@ def import_jsonl_gzip(path, repository, *, batch_size=200, rejection_file=None):
             if len(batch) >= batch_size:
                 stats['upserted'] += repository.save_recipes(list(batch.values()))
                 batch.clear()
+                print(json.dumps(stats), flush=True)
     if batch:
         stats['upserted'] += repository.save_recipes(list(batch.values()))
     return stats
@@ -127,7 +129,7 @@ def import_jsonl_gzip(path, repository, *, batch_size=200, rejection_file=None):
 def main():
     import argparse
     from dotenv import load_dotenv
-    parser = argparse.ArgumentParser(description='Import text-only refood-recipes.jsonl.gz; no Hugging Face calls')
+    parser = argparse.ArgumentParser(description='Import text-only .jsonl or .jsonl.gz; no Hugging Face calls')
     parser.add_argument('artifact', type=Path)
     parser.add_argument('--batch-size', type=int, default=200)
     parser.add_argument('--rejections', type=Path, default=Path('recipe-rejections.jsonl'))

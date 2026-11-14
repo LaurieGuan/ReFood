@@ -138,3 +138,20 @@ class LargeArtifactTests(unittest.TestCase):
         self.assertEqual(stats['upserted'],1001)
         self.assertEqual(repository.save_recipes.call_count,6)
         self.assertTrue(all(len(call.args[0])<=200 for call in repository.save_recipes.call_args_list))
+
+
+class RawArtifactTests(unittest.TestCase):
+    def test_raw_jsonl_import(self):
+        import tempfile
+        from pathlib import Path
+        from services.recipe_import import import_jsonl_gzip
+        repository = MagicMock()
+        repository.save_recipes.side_effect = lambda batch: len(batch)
+        row = {'recipe_id': 42, 'name': 'Raw tomato', 'ingredients': ['tomates'], 'n_ingredients': 1, 'steps': ['Cut tomatoes']}
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'recipes.jsonl'
+            path.write_text(json.dumps(row) + '\n')
+            result = import_jsonl_gzip(path, repository)
+        self.assertEqual(result['accepted'], 1)
+        recipe = repository.save_recipes.call_args.args[0][0]
+        self.assertEqual(recipe.ingredients[0].ingredient_id, 'ing_tomato')
