@@ -10,7 +10,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-The shared Flask foundation runs without database connectivity or external API keys.
+On direct interactive first run (`python app.py`), the backend creates an ignored `.env` and prompts securely for a Gemini API key (Enter to skip). If `database/.env` already exists, it also configures `DATABASE_URL` for persistent MariaDB. No interactive prompt runs in tests, imports or CI. Existing shell environment variables take precedence over `.env`.
 
 ## Run and test
 From `src/backend`, with the virtual environment activated:
@@ -20,8 +20,7 @@ python -m unittest discover -s tests -v
 ```
 `GET /api/v1/health` returns HTTP 200 with `{"status":"ok","service":"refood"}`.
 `create_app(test_config=None)` loads environment settings, then applies test overrides.
-See `.env.example` for supported variables; export them in your shell (the file is
-not automatically loaded). `DATABASE_URL` is optional and reserved for later use.
+See `.env.example` for local settings. `python app.py` loads `src/backend/.env` automatically. This file is already covered by root `.gitignore`; never commit credentials. `DATABASE_URL` is required for persistent database use; omitting it uses in-memory/demo fallback.
 
 ## Add a resource blueprint
 Create `routes/<resource>.py` with a uniquely named Flask `Blueprint`. Import and
