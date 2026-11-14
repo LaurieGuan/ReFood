@@ -5,3 +5,7 @@ class MarketplaceError(Exception):
     def __init__(self, code, message, status=409):
         super().__init__(message)
         self.code, self.message, self.status = code, message, status
+
+
+class DonationError(MarketplaceError):
+    """Same HTTP-neutral error attributes for donation operations."""

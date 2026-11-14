@@ -88,3 +88,21 @@ class ExchangeReservationRow(Base):
     ingredient_id = Column(String(191), ForeignKey("ingredients.ingredient_id"), nullable=False)
     amount = Column(Float, nullable=False)
     unit = Column(String(20), nullable=False)
+
+
+class DonationOfferRow(Base):
+    __tablename__ = "donation_offers"
+    offer_id = Column(String(191), primary_key=True)
+    business_id = Column(String(191), nullable=False, index=True)
+    cancelled = Column(Integer, nullable=False, default=0)
+    payload = Column(JSON, nullable=False)
+
+
+class DonationReservationRow(Base):
+    __tablename__ = "donation_reservations"
+    reservation_id = Column(String(191), primary_key=True)
+    offer_id = Column(String(191), ForeignKey("donation_offers.offer_id"), nullable=False, index=True)
+    student_id = Column(String(191), nullable=False, index=True)
+    quantity = Column(Integer, nullable=False)
+    status = Column(String(20), nullable=False)
+    payload = Column(JSON, nullable=False)
