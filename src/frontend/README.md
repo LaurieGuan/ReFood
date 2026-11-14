@@ -24,3 +24,9 @@ The React source is organized by responsibility:
 - `src/utils/` and `src/styles/` hold shared helpers and global styles.
 
 `App.jsx` coordinates the current multi-step flow. Keep the scan session, favorites, and preferences in their focused hooks as additional screens are introduced; promote other state only when it is reused across screens.
+
+## Demonstration data and limitations
+
+The React app uses local mock services in `src/services/api/`. Recipes, favorites, preferences and custom ingredients persist in browser storage. Ingredients confirmed during a scan are kept only for the current session.
+
+Diet choices and illustrative recipe metadata are configured in `src/data/`, as are the fictional store locations and product prices. Recipe search excludes unknown values when a corresponding filter is active; dietary and price data are illustrative and must not be treated as verified. The photo scan returns predefined candidates and requires confirmation. Store distances are straight-line estimates from browser geolocation, and the export includes a Maps directions link.
