@@ -33,7 +33,7 @@ export function RecipeGrid({ recipes, saved, onOpen, onToggle }) {
                 <h3>{recipe.title}</h3>
                 <p>
                   {recipe.match?.missing_ingredient_ids?.length
-                    ? `À prévoir : ${recipe.match.missing_ingredient_ids.map((id) => label(mockApi.ingredientName(id))).join(", ")}`
+                    ? `À prévoir : ${(recipe.match.missing_ingredients ?? recipe.match.missing_ingredient_ids.map((id) => ({ name: mockApi.ingredientName(id) }))).map((item) => label(item.name)).join(", ")}`
                     : recipe.match
                       ? "Ingrédients essentiels présents"
                       : "Votre favori, gardé pour plus tard."}

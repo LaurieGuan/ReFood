@@ -40,7 +40,10 @@ class EnrichmentRouteTests(unittest.TestCase):
         search.assert_called_once_with("tofu", 3)
 
     def test_grocery_mock_and_bad_queries(self):
-        response = self.client.get("/api/v1/grocery/products/search?q=milk")
+        # Route tests must not depend on live provider connectivity.
+        mock_result = {"query": "milk", "results": [], "source": "mock"}
+        with patch("routes.grocery.search_grocery_products", return_value=mock_result):
+            response = self.client.get("/api/v1/grocery/products/search?q=milk")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json()["source"], "mock")
         for query in ("", "?q=a", "?q=milk&limit=x", "?q=milk&limit=0"):

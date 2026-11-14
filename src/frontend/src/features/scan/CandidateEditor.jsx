@@ -10,6 +10,7 @@ export function CandidateEditor({ scan, onConfirm, loading }) {
     manualName,
     setManualName,
     invalidQuantity,
+    invalidCanonical,
     update,
     addManual,
     confirm,
@@ -44,6 +45,11 @@ export function CandidateEditor({ scan, onConfirm, loading }) {
           Les quantités doivent être des nombres positifs ou nuls.
         </p>
       )}
+      {invalidCanonical && (
+        <p className="pantry-error" role="alert">
+          Le nom doit contenir au moins une lettre ou un chiffre.
+        </p>
+      )}
       <div className="confirm-footer">
         <span>
           {approved.length} ingrédient{approved.length === 1 ? "" : "s"} à
@@ -56,7 +62,7 @@ export function CandidateEditor({ scan, onConfirm, loading }) {
         <button
           type="button"
           className="button primary"
-          disabled={loading || approved.length === 0 || invalidQuantity}
+          disabled={loading || approved.length === 0 || invalidQuantity || invalidCanonical}
           onClick={confirm}
         >
           {loading

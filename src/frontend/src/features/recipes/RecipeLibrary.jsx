@@ -57,7 +57,7 @@ export function RecipeLibrary({ saved, onOpen, onToggle, onChanged }) {
                 onOpen={onOpen}
                 onToggle={onToggle}
               />
-              <div className="library-card-actions">
+              {!recipe.recipe_id && <div className="library-card-actions">
                 <button className="text-button" onClick={() => edit(recipe)}>
                   Modifier
                 </button>
@@ -68,7 +68,7 @@ export function RecipeLibrary({ saved, onOpen, onToggle, onChanged }) {
                 >
                   Supprimer
                 </button>
-              </div>
+              </div>}
             </div>
           ))}
         </div>

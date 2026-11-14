@@ -42,9 +42,9 @@ export function StoreCard({
         {offers.map((offer) => (
           <div className="offer" key={offer.ingredient_id}>
             <span>
-              {label(mockApi.ingredientName(offer.ingredient_id))}
+              {label(offer.ingredient_name ?? mockApi.ingredientName(offer.ingredient_id))}
               <small>
-                {offer.product_name} · {offer.package_quantity}{" "}
+                {offer.retailer_link ? <a href={offer.retailer_link} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()}>{offer.product_name}</a> : offer.product_name} {offer.brand ? `· ${offer.brand}` : ""} · {offer.package_quantity ?? "format inconnu"}{" "}
                 {offer.package_unit}
               </small>
             </span>
@@ -59,7 +59,7 @@ export function StoreCard({
         <b>{money(total)}</b>
       </div>
       <small className="store-source">
-        Source démo_catalog · valeurs illustratives
+        {offers[0]?.source ? `Source ${offers[0].source} · prix observés${offers[0].observed_at ? ` le ${new Date(offers[0].observed_at).toLocaleDateString('fr-CA')}` : ''}` : 'Source démo_catalog · valeurs illustratives'}
       </small>
     </label>
   );

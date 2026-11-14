@@ -36,7 +36,9 @@ export function RecipeDetails({ recipe, onClose, onChoose, saved, onToggle }) {
           ))}
         </ul>
         <h3>Préparation</h3>
-        <p className="instructions">{recipe.instructions}</p>
+        {Array.isArray(recipe.instructions) ? (
+          recipe.instructions.length ? <ol className="instructions">{recipe.instructions.map((step, index) => <li key={index}>{step}</li>)}</ol> : <p>Instructions non disponibles.</p>
+        ) : <p className="instructions">{recipe.instructions}</p>}
         <div className="detail-actions">
           <button
             className={`button ${saved ? "secondary" : "primary"}`}

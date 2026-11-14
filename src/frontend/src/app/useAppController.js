@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
-import { mockPrices } from "../services/api/mockPrices.js";
 import { useScanSession } from "../hooks/useScanSession.js";
 import { useFavorites } from "../hooks/useFavorites.js";
 import { usePreferences } from "../hooks/usePreferences.js";
+import { api, isDemoMode } from "../services/api/flaskApi.js";
 import { mockApi } from "../services/api/mockApi.js";
+import { matchesPreferences } from "../features/preferences/recipeFilters.js";
 import { label } from "../utils/ingredients.js";
 
 export function useAppController() {
@@ -58,7 +59,7 @@ export function useAppController() {
     setError("");
     try {
       const responses = await Promise.all(
-        photos.map((photo) => mockApi.scanImage(photo)),
+        photos.map((photo) => api.scanImage(photo)),
       );
       const uniqueCandidates = new Map();
       for (const candidate of responses.flatMap(
@@ -85,16 +86,12 @@ export function useAppController() {
     setLoading(true);
     setError("");
     try {
-      const response = await mockApi.searchRecipes({
-        ingredient_ids: confirmedItems
-          .filter((item) => item.remaining_fraction !== 0)
-          .map((item) => item.ingredient_id)
-          .filter(Boolean),
-        preferences: preferences ?? {},
-        limit: 100,
-      });
+      await api.savePantry(confirmedItems);
+      const response = await api.searchRecipes(
+        confirmedItems.filter((item) => item.remaining_fraction !== 0), 100, preferences ?? {},
+      );
       setScan({ ...scan, confirmedItems });
-      setSuggestions(response.recipes);
+      setSuggestions(isDemoMode ? response.recipes : response.recipes.filter((recipe) => matchesPreferences(recipe, preferences ?? {})));
       setStage(2);
     } catch (e) {
       setError(e.message);
@@ -106,7 +103,7 @@ export function useAppController() {
     setLoading(true);
     setError("");
     try {
-      setActiveRecipe(await mockApi.getRecipe(id));
+      setActiveRecipe(await api.getRecipe(id));
     } catch (e) {
       setError(e.message);
     } finally {
@@ -116,23 +113,21 @@ export function useAppController() {
   const chooseRecipe = async (recipe) => {
     setActiveRecipe(null);
     setScreen("scan");
-    setSelectedRecipe(recipe);
     setPriceData(null);
     setSelectedStore("");
     setStage(3);
     setLoading(true);
     setError("");
+    let selected = recipe;
     try {
-      const missingIds = recipe.ingredients
-        .filter(
-          (item) =>
-            item.essential && !ingredientIds.includes(item.ingredient_id),
-        )
-        .map((item) => item.ingredient_id);
-      const response = await mockPrices.comparePrices({
-        ingredient_ids: missingIds,
-        location,
-      });
+      if (!isDemoMode && recipe.recipe_id && screen !== "scan") {
+        const confirmed = scan?.confirmedItems?.filter((item) => item.remaining_fraction !== 0) ?? [];
+        const refreshed = await api.searchRecipes(confirmed, 100);
+        selected = refreshed.recipes.find((item) => item.id === recipe.id) ?? { ...recipe, match: { ...recipe.match, missing_ingredients: recipe.ingredients } };
+      }
+      setSelectedRecipe(selected);
+      const missing = selected.match?.missing_ingredients ?? selected.ingredients.filter((item) => item.essential && !ingredientIds.includes(item.ingredient_id));
+      const response = await api.groceryPrices(missing, location);
       setPriceData(response);
       const store = response.stores.find((entry) =>
         response.offers.some((offer) => offer.store_id === entry.id),
@@ -140,27 +135,30 @@ export function useAppController() {
       if (store) setSelectedStore(store.id);
     } catch (e) {
       setError(e.message);
+      const missing = selected.match?.missing_ingredients ?? selected.ingredients.filter((item) => item.essential && !ingredientIds.includes(item.ingredient_id));
+      setSelectedRecipe(selected);
+      setPriceData({ stores: [], offers: [], unpriced_ingredient_ids: missing.map((item) => item.ingredient_id), missing_ingredients: missing, demo: isDemoMode });
     } finally {
       setLoading(false);
     }
   };
   const exportList = () => {
     if (!selectedRecipe) return;
-    const missing = selectedRecipe.ingredients.filter(
+    const missing = selectedRecipe.match?.missing_ingredients ?? selectedRecipe.ingredients.filter(
       (item) => item.essential && !ingredientIds.includes(item.ingredient_id),
     );
     const offers =
       priceData?.offers.filter((offer) => offer.store_id === selectedStore) ??
       [];
     const store = priceData?.stores.find((item) => item.id === selectedStore);
-    const route = store
+    const route = store?.address
       ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(store.address)}${origin.trim() ? `&origin=${encodeURIComponent(origin.trim())}` : ""}`
       : null;
     const lines = [
       `REFOOD — Liste de courses`,
       `Recette : ${selectedRecipe.title}`,
       `Magasin : ${priceData?.stores.find((store) => store.id === selectedStore)?.name || "Non sélectionné"}`,
-      "Données de démonstration — prix non actuels",
+      priceData?.demo ? "Données de démonstration — prix non actuels" : "Prix observés : disponibilité et correspondance à vérifier",
       "",
       "À acheter:",
       ...missing.map((item) => {
@@ -188,7 +186,7 @@ export function useAppController() {
     try {
       const wasSaved = saved.some((item) => item.id === recipe.id);
       await toggleFavorite(recipe);
-      say(wasSaved ? "Recette retirée des favoris." : "Recette enregistrée.");
+      say(wasSaved ? "Recette retirée des favoris." : "Recette enregistrée sur cet appareil.");
     } catch (e) {
       setError(e.message);
     } finally {
@@ -201,7 +199,7 @@ export function useAppController() {
     try {
       setPreferences(await mockApi.putPreferences(next));
       setPreferencesSaved(true);
-      say("Préférences enregistrées.");
+      say("Préférences gardées sur cet appareil.");
     } catch (e) {
       setError(e.message);
     } finally {
@@ -256,18 +254,10 @@ export function useAppController() {
       async ({ coords }) => {
         const next = { latitude: coords.latitude, longitude: coords.longitude };
         setLocation(next);
-        const missingIds = selectedRecipe.ingredients
-          .filter(
-            (item) =>
-              item.essential && !ingredientIds.includes(item.ingredient_id),
-          )
-          .map((item) => item.ingredient_id);
-        setPriceData(
-          await mockPrices.comparePrices({
-            ingredient_ids: missingIds,
-            location: next,
-          }),
-        );
+        try {
+          const missing = selectedRecipe.match?.missing_ingredients ?? selectedRecipe.ingredients.filter((item) => item.essential && !ingredientIds.includes(item.ingredient_id));
+          setPriceData(await api.groceryPrices(missing, next));
+        } catch (e) { setError(e.message); }
       },
       () => setError("Impossible d’obtenir votre position."),
     );

@@ -51,7 +51,7 @@ export function CandidateRow({ item, loading, onUpdate }) {
         onChange={(event) => update({ unitChoice: event.target.value })}
       >
         <option value="unknown">unité ?</option>
-        <option value="unit">unités</option>
+        <option value="piece">pièce(s)</option>
         <option value="g">g</option>
         <option value="ml">ml</option>
       </select>

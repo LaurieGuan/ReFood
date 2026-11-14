@@ -11,7 +11,7 @@ export function StoreScreen({
   onLocate,
   onContinue,
 }) {
-  const missing = recipe.ingredients.filter(
+  const missing = recipe.match?.missing_ingredients ?? recipe.ingredients.filter(
     (item) => item.essential && !ingredientIds.includes(item.ingredient_id),
   );
   const merchants = priceData.stores.filter((store) =>
@@ -24,11 +24,10 @@ export function StoreScreen({
         <div>
           <h2>Pour cuisiner : {recipe.title}</h2>
           <p>
-            Les montants affichent les prix du paquet complet proposé, pas le
-            coût de la quantité utilisée.
+            Les produits trouvés sont à vérifier. Les montants correspondent au prix du paquet complet, pas à la quantité utilisée.
           </p>
         </div>
-        <span className="demo-tag">PRIX ILLUSTRATIFS</span>
+        <span className="demo-tag">{priceData.demo ? "PRIX ILLUSTRATIFS" : "PRIX OBSERVÉS"}</span>
       </div>
       {!hasNeeds && (
         <div className="panel no-purchases">
@@ -43,19 +42,19 @@ export function StoreScreen({
         <div className="panel no-purchases">
           <span>i</span>
           <div>
-            <b>Aucune offre démo pour les ingrédients manquants.</b>
+            <b>Aucune offre trouvée pour les ingrédients manquants.</b>
             <small>
               Vous pourrez tout de même exporter votre liste sans prix.
             </small>
           </div>
         </div>
       )}
-      <div className="store-location">
+      {priceData.demo && <div className="store-location">
         Classez les magasins fictifs selon votre position.{" "}
         <button className="text-button" onClick={onLocate}>
           Utiliser ma position
         </button>
-      </div>
+      </div>}
       {!!merchants.length && (
         <div className="store-grid">
           {merchants.map((merchant) => {
@@ -79,7 +78,7 @@ export function StoreScreen({
         <p className="unpriced-note">
           Prix introuvable pour :{" "}
           {priceData.unpriced_ingredient_ids
-            .map((id) => label(mockApi.ingredientName(id)))
+            .map((id) => label(priceData.missing_ingredients?.find((item) => item.ingredient_id === id)?.name ?? mockApi.ingredientName(id)))
             .join(", ")}
           .
         </p>
@@ -90,8 +89,7 @@ export function StoreScreen({
         </button>
       </div>
       <p className="price-disclaimer">
-        Offres fictives fournies par l’API de démonstration. Elles ne
-        représentent pas des prix ou stocks actuels.
+        {priceData.demo ? "Offres fictives fournies par l’API de démonstration." : "Produits trouvés par recherche : vérifiez leur correspondance et les prix auprès du détaillant."}
       </p>
     </section>
   );
@@ -107,13 +105,13 @@ export function ExportScreen({
   onDownload,
   onRestart,
 }) {
-  const missing = recipe.ingredients.filter(
+  const missing = recipe.match?.missing_ingredients ?? recipe.ingredients.filter(
     (item) => item.essential && !ingredientIds.includes(item.ingredient_id),
   );
   const offers =
     priceData?.offers.filter((offer) => offer.store_id === selectedStore) ?? [];
   const store = priceData?.stores.find((item) => item.id === selectedStore);
-  const mapUrl = store
+  const mapUrl = store?.address
     ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(store.address)}${origin.trim() ? `&origin=${encodeURIComponent(origin.trim())}` : ""}`
     : null;
   return (
@@ -201,8 +199,7 @@ export function ExportScreen({
         </button>
       </div>
       <p className="price-disclaimer">
-        La liste est créée sur votre appareil. Les prix affichés sont fictifs et
-        servent uniquement à prévisualiser le parcours.
+        {priceData?.demo ? "La liste est créée sur votre appareil. Les prix affichés sont fictifs." : "La liste est créée sur votre appareil. Vérifiez les produits et les prix auprès du détaillant."}
       </p>
     </section>
   );
