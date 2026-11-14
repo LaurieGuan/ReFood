@@ -7,8 +7,8 @@ export function confirmedItems(items) {
     if (!identity) throw new Error('Nom invalide');
     const quantity = item.quantityText === '' ? null : Number(item.quantityText);
     if (quantity != null && (!Number.isFinite(quantity) || quantity < 0)) throw new Error('Quantité invalide');
-    const next = {...identity, quantity, unit:quantity == null ? 'unknown' : item.unitChoice,
-      remaining_fraction:item.remaining_fraction, location:item.location, source:item.source};
+    const next = {...identity, quantity, unit:quantity == null ? 'unknown' : item.quantityMode === 'pieces' ? 'piece' : item.unitChoice, quantityMode:item.quantityMode,
+      remaining_fraction:item.quantityMode && item.quantityMode !== 'container' ? null : item.remaining_fraction, location:item.location, source:item.source};
     const previous = result.get(identity.ingredient_id);
     if (previous && (previous.quantity !== next.quantity || previous.unit !== next.unit || previous.remaining_fraction !== next.remaining_fraction)) throw new Error('Un ingrédient apparaît plusieurs fois avec des quantités différentes. Corrigez les doublons.');
     result.set(identity.ingredient_id,next);

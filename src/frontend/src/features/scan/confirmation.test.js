@@ -12,3 +12,12 @@ test('conflicting duplicates and invalid quantities are rejected',()=>{
   assert.throws(()=>confirmedItems([item('egg','2'),item('oeufs','4')]));
   assert.throws(()=>confirmedItems([item('milk','Infinity')]));
 });
+
+test('preserves teammate piece and container quantity controls',()=>{
+  const pieces=confirmedItems([{...item('egg','2'),quantityMode:'pieces',unitChoice:'unknown',remaining_fraction:0.5}])[0];
+  assert.equal(pieces.unit,'piece');
+  assert.equal(pieces.remaining_fraction,null);
+  const container=confirmedItems([{...item('milk','1000'),quantityMode:'container',unitChoice:'ml',remaining_fraction:0.5}])[0];
+  assert.equal(container.unit,'ml');
+  assert.equal(container.remaining_fraction,0.5);
+});

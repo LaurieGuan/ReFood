@@ -10,8 +10,10 @@ import { AlertBanner } from "../components/AlertBanner.jsx";
 import { StoreScreen, ExportScreen } from "../features/stores/StoreScreens.jsx";
 import { Login } from "../features/auth/Login.jsx";
 import { PhotoPicker } from "../features/scan/PhotoPicker.jsx";
+import { Donations } from "../features/donations/Donations.jsx";
+import { Marketplace } from "../features/marketplace/Marketplace.jsx";
 import { mockApi } from "../services/api/mockApi.js";
-import { isDemoMode } from "../services/api/flaskApi.js";
+import { api, isDemoMode } from "../services/api/flaskApi.js";
 import "../styles/global.css";
 import "../styles/flow.css";
 import "../styles/login.css";
@@ -45,6 +47,7 @@ export function App() {
     toast,
     ingredientIds,
     runScan,
+    startManual,
     getRecipes,
     openRecipe,
     chooseRecipe,
@@ -67,7 +70,7 @@ export function App() {
       <AppNavigation
         screen={screen}
         savedCount={saved.length}
-        apiUrl={mockApi.baseUrl}
+        apiUrl={api.baseUrl}
         onNavigate={(nextScreen) => {
           setScreen(nextScreen);
           setError("");
@@ -149,6 +152,9 @@ export function App() {
                         onClick={runScan}
                       >
                         Analyser la photo →
+                      </button>
+                      <button type="button" className="button secondary full" onClick={startManual}>
+                        Ajouter mes ingrédients manuellement
                       </button>
                     </section>
                     <aside className="scan-help">
@@ -261,6 +267,8 @@ export function App() {
               )}
             </>
           )}
+          {screen === "donations" && <Donations />}
+          {screen === "marketplace" && <Marketplace />}
           {screen === "saved" && (
             <RecipeLibrary
               saved={saved}

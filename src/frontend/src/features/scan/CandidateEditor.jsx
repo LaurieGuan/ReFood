@@ -73,8 +73,9 @@ export function CandidateEditor({ scan, onConfirm, loading }) {
         </button>
       </div>
       <p className="contract-note">
-        Les ingrédients servent à cette recherche. Une quantité vide reste «
-        inconnue ».
+        Pour un contenant, indiquez sa capacité totale et son niveau restant.
+        À la pièce, vous pouvez saisir une fraction, par exemple 0,5 avocat.
+        Une quantité vide reste inconnue. La démo ne vérifie pas les quantités pour les recettes.
       </p>
     </>
   );

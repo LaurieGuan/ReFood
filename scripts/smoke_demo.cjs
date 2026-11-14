@@ -31,6 +31,7 @@ const assert = require('node:assert/strict');
     assert.ok(scan.candidates.length);
     assert.ok(scan.candidates.every(c=>c.quantity.amount===null));
     await page.locator('.ingredient-name').first().fill('flour');
+    await page.locator('.quantity-mode').first().selectOption('container');
     await page.locator('.quantity-input').first().fill('500');
     await page.locator('.unit-select').first().selectOption('g');
     // Exercise adding/removing one candidate before adding actual pantry labels.
