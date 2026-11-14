@@ -10,6 +10,13 @@ npm install
 npm run dev
 ```
 
+The login forms use Google reCAPTCHA v2. For local demonstration, the public
+Google test key is used and always passes. Set `VITE_RECAPTCHA_SITE_KEY` to a
+real v2 site key for your domain; restart Vite after changing it. Authentication
+is not implemented yet: the future backend must verify the response token with
+Google using a secret key stored only on the server. The test key does not
+provide bot protection.
+
 Tailwind CSS is loaded in the browser from its CDN script in `index.html`; there is no Tailwind build or PostCSS step. The CDN is suitable for prototyping and requires an internet connection in the browser.
 
 ## Source layout
