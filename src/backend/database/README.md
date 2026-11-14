@@ -133,3 +133,15 @@ From `src/backend`: `python -m unittest discover -s tests -v`.
 Matcher and memory tests run without MariaDB. MariaDB adapter tests use DB-API
 fakes to exercise mapping, bound parameters, commit/rollback and cleanup;
 these do **not** validate a live MariaDB server or migration.
+
+
+## One-command-style local Compose startup (all operating systems)
+
+Copy `src/backend/database/.env.example` to `src/backend/database/.env` (ignored by Git). From the repository root:
+
+```bash
+sudo docker compose --env-file src/backend/database/.env -f src/backend/database/compose.yaml up -d --wait
+sudo docker compose --env-file src/backend/database/.env -f src/backend/database/compose.yaml ps
+```
+
+On Linux with configured Docker permissions or Docker Desktop, `sudo` is not needed. Explicit `--env-file` avoids losing exported credentials under `sudo`. Run `python -m database.engine` from `src/backend` with `DATABASE_URL` exported (database URL must match your local .env). Full instructions are in [MVP Local Setup](../../../docs/obsidian/MVP%20Local%20Setup.md).
