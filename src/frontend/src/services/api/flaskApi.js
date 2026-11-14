@@ -1,5 +1,6 @@
 import { mockApi } from './mockApi.js';
 import { mockPrices } from './mockPrices.js';
+import { classifyGroceryProduct } from './productRelevance.js';
 
 const baseUrl = '/api/v1';
 async function request(path, options = {}) {
@@ -68,7 +69,7 @@ export const flaskApi = {
   },
   async groceryPrices(ingredients) {
     const responses = await Promise.all(ingredients.map(async (item) => ({ item, data: await this.searchGroceryItems(item.name) })));
-    const candidates = responses.flatMap(({ item, data }) => data.results.flatMap((product) => {
+    const candidates = responses.flatMap(({ item, data }) => data.results.filter((product) => classifyGroceryProduct(item, product).eligible).flatMap((product) => {
       const prices = product.store_prices?.length ? product.store_prices : [{ store: product.cheapest_store, price_cents: product.cheapest_price_cents, size: product.size, retailer_link: product.retailer_link, observed_at: product.updated_at }];
       return prices.filter((price) => price.store && price.price_cents != null).map((price) => ({
         ingredient_id: item.ingredient_id, ingredient_name: item.name, store_id: price.store,
