@@ -1,0 +1,291 @@
+{
+  "features": [
+    {
+      "feature_idx": 0,
+      "name": "name",
+      "type": {
+        "dtype": "string",
+        "_type": "Value"
+      }
+    },
+    {
+      "feature_idx": 1,
+      "name": "recipe_id",
+      "type": {
+        "dtype": "int64",
+        "_type": "Value"
+      }
+    },
+    {
+      "feature_idx": 2,
+      "name": "minutes",
+      "type": {
+        "dtype": "int64",
+        "_type": "Value"
+      }
+    },
+    {
+      "feature_idx": 3,
+      "name": "description",
+      "type": {
+        "dtype": "string",
+        "_type": "Value"
+      }
+    },
+    {
+      "feature_idx": 4,
+      "name": "tags",
+      "type": {
+        "feature": {
+          "dtype": "string",
+          "_type": "Value"
+        },
+        "_type": "List"
+      }
+    },
+    {
+      "feature_idx": 5,
+      "name": "steps",
+      "type": {
+        "feature": {
+          "dtype": "string",
+          "_type": "Value"
+        },
+        "_type": "List"
+      }
+    },
+    {
+      "feature_idx": 6,
+      "name": "n_steps",
+      "type": {
+        "dtype": "int64",
+        "_type": "Value"
+      }
+    },
+    {
+      "feature_idx": 7,
+      "name": "n_ingredients",
+      "type": {
+        "dtype": "int32",
+        "_type": "Value"
+      }
+    },
+    {
+      "feature_idx": 8,
+      "name": "nutrition",
+      "type": {
+        "calories": {
+          "dtype": "float32",
+          "_type": "Value"
+        },
+        "total_fat_pdv": {
+          "dtype": "float32",
+          "_type": "Value"
+        },
+        "sugar_pdv": {
+          "dtype": "float32",
+          "_type": "Value"
+        },
+        "sodium_pdv": {
+          "dtype": "float32",
+          "_type": "Value"
+        },
+        "protein_pdv": {
+          "dtype": "float32",
+          "_type": "Value"
+        },
+        "saturated_fat_pdv": {
+          "dtype": "float32",
+          "_type": "Value"
+        },
+        "carbs_pdv": {
+          "dtype": "float32",
+          "_type": "Value"
+        }
+      }
+    },
+    {
+      "feature_idx": 9,
+      "name": "rating",
+      "type": {
+        "dtype": "float32",
+        "_type": "Value"
+      }
+    },
+    {
+      "feature_idx": 10,
+      "name": "num_ratings",
+      "type": {
+        "dtype": "float32",
+        "_type": "Value"
+      }
+    },
+    {
+      "feature_idx": 11,
+      "name": "markdown",
+      "type": {
+        "dtype": "string",
+        "_type": "Value"
+      }
+    },
+    {
+      "feature_idx": 12,
+      "name": "image",
+      "type": {
+        "_type": "Image"
+      }
+    }
+  ],
+  "rows": [
+    {
+      "row_idx": 0,
+      "row": {
+        "name": "chicken lickin  good  pork chops",
+        "recipe_id": 63986,
+        "minutes": 500,
+        "description": "here's and old standby i enjoy from time to time. it's from an old newspaper clipping i cut out years ago. very tasty.",
+        "tags": [
+          "weeknight",
+          "time-to-make",
+          "course",
+          "main-ingredient",
+          "preparation",
+          "main-dish",
+          "pork",
+          "crock-pot-slow-cooker",
+          "dietary",
+          "meat",
+          "pork-chops",
+          "equipment"
+        ],
+        "steps": [
+          "dredge pork chops in mixture of flour , salt , dry mustard and garlic powder",
+          "brown in oil in a large skillet",
+          "place browned pork chops in a crock pot",
+          "add the can of soup , undiluted",
+          "cover and cook on low for 6-8 hours"
+        ],
+        "n_steps": 5,
+        "n_ingredients": 7,
+        "nutrition": {
+          "calories": 105.69999694824219,
+          "total_fat_pdv": 8,
+          "sugar_pdv": 0,
+          "sodium_pdv": 26,
+          "protein_pdv": 5,
+          "saturated_fat_pdv": 4,
+          "carbs_pdv": 3
+        },
+        "rating": 4.3684210777282715,
+        "num_ratings": 19,
+        "markdown": "# Chicken Lickin  Good  Pork Chops\n**Recipe ID:** 63986\n**Cook Time:** 500 minutes\n**Rating:** 4.37/5 stars (19 reviews)\n\n## Description\nhere's and old standby i enjoy from time to time. it's from an old newspaper clipping i cut out years ago. very tasty.\n\n## Ingredients\nlean pork chops, flour, salt, dry mustard, garlic powder, oil, chicken rice soup\n\n## Instructions\n1. Dredge pork chops in mixture of flour , salt , dry mustard and garlic powder\n2. Brown in oil in a large skillet\n3. Place browned pork chops in a crock pot\n4. Add the can of soup , undiluted\n5. Cover and cook on low for 6-8 hours\n\n## Nutrition (PDV)\nCalories: 105.7, Total Fat: 8.0, Sugar: 0.0, Sodium: 26.0, Protein: 5.0, Saturated Fat: 4.0\n\n## Reviews\n- I made this for dinner tonight and the chops were tasty and fork tender! If you are salt sensitive (I am not) I would cut back on the salt and look for low sodium soup. I couldn't resist adding a half cup of white wine and thicken the juices. This was excellent served with rice and chive buttered fresh carrots. For a simple meal that is hardy this is just the ticket!\n- A big hit with the meat-and-potatoes guy in the house. Served the chops with mashed potatoes. Be sure you don't overcook the chops if yours aren't 1\" thick. Thanks, Chuck.\n- Wow....great crockpot recipe!! The chops were very tasty and so tender! Many thanks!\n- This was excellent. I bought chops that were just over an inch thick and let them cook for a solid 8 hours. The sauce made from the meat and soup was delicious served over couscous. I served this with Roosie's Zucotte (#96811) and we had a great meal. The meat fell right off the bones, it was so tender and juicy. Everyone here enjoyed this dish very much - thank you for sharing!\n- I didn't realize that this was a crock pot recipe until I was getting started on planning dinner only a couple of hours to go so I made it in a fry pan- reduced the recipe to 1 chop, used the whole tin of soup, 1 1/2 tsp mustard and the full garlic. Browned the chop, poured in the soup mixture and cooked it at 2 element level for the full 2 hours. Perfect and the aroma in the house was wonderfull. I added some broccoli & peppers last 10 minutes, served with steamed carrots Wonderful dinner thanks Chuck\n"
+      },
+      "truncated_cells": []
+    },
+    {
+      "row_idx": 1,
+      "row": {
+        "name": "chile rellenos",
+        "recipe_id": 43026,
+        "minutes": 45,
+        "description": "a favorite from a local restaurant no longer in business. not an authentic mexican chile relleno, but a crispy, flaky version.",
+        "tags": [
+          "60-minutes-or-less",
+          "time-to-make",
+          "course",
+          "main-ingredient",
+          "cuisine",
+          "preparation",
+          "north-american",
+          "5-ingredients-or-less",
+          "appetizers",
+          "side-dishes",
+          "eggs-dairy",
+          "american",
+          "southwestern-united-states",
+          "easy",
+          "vegetarian",
+          "cheese",
+          "deep-fry",
+          "dietary",
+          "oamc-freezer-make-ahead",
+          "number-of-servings",
+          "technique"
+        ],
+        "steps": [
+          "drain green chiles",
+          "sprinkle cornstarch on sheet pan",
+          "open up chile and place on egg roll wrapper with corner facing you",
+          "place cheese stick on chile and roll up , tucking in corners and moistening edges to seal",
+          "toss in cornstarch , dusting liberally",
+          "shake off excess cornstarch and deep fry in 350 oil to cover until lightly golden and cheese just starts to ooze out",
+          "drain on paper towels and keep warm in 250 oven",
+          "serve as a side dish or appetizer with your favorite mexican meal",
+          "add your favorite condi- ments / sauces"
+        ],
+        "n_steps": 9,
+        "n_ingredients": 5,
+        "nutrition": {
+          "calories": 94,
+          "total_fat_pdv": 10,
+          "sugar_pdv": 0,
+          "sodium_pdv": 11,
+          "protein_pdv": 11,
+          "saturated_fat_pdv": 21,
+          "carbs_pdv": 0
+        },
+        "rating": 4.045454502105713,
+        "num_ratings": 22,
+        "markdown": "# Chile Rellenos\n**Recipe ID:** 43026\n**Cook Time:** 45 minutes\n**Rating:** 4.05/5 stars (22 reviews)\n\n## Description\na favorite from a local restaurant no longer in business. not an authentic mexican chile relleno, but a crispy, flaky version.\n\n## Ingredients\negg roll wrap, whole green chilies, cheese, cornstarch, oil\n\n## Instructions\n1. Drain green chiles\n2. Sprinkle cornstarch on sheet pan\n3. Open up chile and place on egg roll wrapper with corner facing you\n4. Place cheese stick on chile and roll up , tucking in corners and moistening edges to seal\n5. Toss in cornstarch , dusting liberally\n6. Shake off excess cornstarch and deep fry in 350 oil to cover until lightly golden and cheese just starts to ooze out\n7. Drain on paper towels and keep warm in 250 oven\n8. Serve as a side dish or appetizer with your favorite mexican meal\n9. Add your favorite condi- ments / sauces\n\n## Nutrition (PDV)\nCalories: 94.0, Total Fat: 10.0, Sugar: 0.0, Sodium: 11.0, Protein: 11.0, Saturated Fat: 21.0\n\n## Reviews\n- Grandma Pam, Oh my goodness,these were so easy to do,and they were so very good. We dipped them in salsa,and they were a hit with my husband. Thank you so much!!! Darlene Summers\n- WOW! When you need a Mexican fix, this is the recipe to try. These are so easy to make and really hit the spot! I love the idea of being able to prepare them ahead of time. Thank you for sharing this. :-)\n- OMG! If I could give this recipe more than 5 stars I would! I loved the ease of prep, and the flavor was awesome! I wasn't sure which size can to use, and realized that 1 4 oz was not nearly enough...it only had 3 chiles in it. hehe So I would recommend at least 3 of those. I made up a green gravy to serve with these as well that I will be posting. Deeeeelicious!!!\n- I have been searching for this recipe. My husbands aunt made these once and we all loved them. I loved the simplicity of the egg roll wrapper! Thanks for posting. I probably won't make often b/c I don't ever fry things - but I am so glad to finally have the recipe. These are yummy!\n- How easy and yummy! I am always looking for a do ahead recipe. My DH and I ate them for supper but what a fabulous appetizer to share. Thanks!\n"
+      },
+      "truncated_cells": []
+    },
+    {
+      "row_idx": 2,
+      "row": {
+        "name": "chinese  candy",
+        "recipe_id": 23933,
+        "minutes": 15,
+        "description": "a little different, and oh so good. i include these when making up candy trays, as gifts, at christmas time.",
+        "tags": [
+          "15-minutes-or-less",
+          "time-to-make",
+          "course",
+          "preparation",
+          "occasion",
+          "5-ingredients-or-less",
+          "desserts",
+          "easy",
+          "kid-friendly",
+          "candy",
+          "dietary",
+          "number-of-servings"
+        ],
+        "steps": [
+          "melt butterscotch chips in heavy saucepan over low heat",
+          "fold in peanuts and chinese noodles until coated",
+          "drop by tablespoon onto waxed paper",
+          "let stand in cool place until firm"
+        ],
+        "n_steps": 4,
+        "n_ingredients": 3,
+        "nutrition": {
+          "calories": 232.6999969482422,
+          "total_fat_pdv": 21,
+          "sugar_pdv": 77,
+          "sodium_pdv": 4,
+          "protein_pdv": 6,
+          "saturated_fat_pdv": 38,
+          "carbs_pdv": 8
+        },
+        "rating": 4.833333492279053,
+        "num_ratings": 12,
+        "markdown": "# Chinese  Candy\n**Recipe ID:** 23933\n**Cook Time:** 15 minutes\n**Rating:** 4.83/5 stars (12 reviews)\n\n## Description\na little different, and oh so good. i include these when making up candy trays, as gifts, at christmas time.\n\n## Ingredients\nbutterscotch chips, chinese noodles, salted peanuts\n\n## Instructions\n1. Melt butterscotch chips in heavy saucepan over low heat\n2. Fold in peanuts and chinese noodles until coated\n3. Drop by tablespoon onto waxed paper\n4. Let stand in cool place until firm\n\n## Nutrition (PDV)\nCalories: 232.7, Total Fat: 21.0, Sugar: 77.0, Sodium: 4.0, Protein: 6.0, Saturated Fat: 38.0\n\n## Reviews\n- A bit different, maybe...but these are delicious little candies. Great to add to cookie trays, as they always seem to draw attention and strike up guests' curiosity. Everyone that has tried them has loved them. I store in refrigerator, but let come to room temp. to serve. Simple to make and SO much fun to eat!...my kinda recipe:) ~Manda\n- I had been looking for this lost recipe for years!! I also sometimes used to make them with semi-sweet chocolate morsels instead of butterscotch! Delicious!\n- Does sound strange, but put all together it really does work!\n- My daughter and I make these in the spring - we mold them into little bird's nests (using our hands) and fill them with malted milk chocolate eggs and/or jelly beans. Thought this idea might be useful! I keep them in the refrig. too and serve at room temperature. They're also good to use as 'bowls' for an ice cream sundae. We chop the peanuts before adding them...\n- My daughter and I made these for a project for school. Strange combination your right but the kids in her 4th. grade class all wanted the recipe ;-) Very good candy, I know we'll make these again.\n"
+      },
+      "truncated_cells": []
+    }
+  ],
+  "num_rows_total": 15698,
+  "num_rows_per_page": 100,
+  "partial": false
+}

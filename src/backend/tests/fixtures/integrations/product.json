@@ -1,0 +1,38 @@
+{
+  "ok": true,
+  "data": {
+    "id": "B2kZGPy7um8F",
+    "name": "Jtt bouchées de bretzels au chocolat au lait",
+    "brand": null,
+    "size": "275g",
+    "price": 5,
+    "unitPrice": {
+      "value": 1.82,
+      "unit": "100 g",
+      "raw": "1.82/100g"
+    },
+    "store": "walmart",
+    "discounted": false,
+    "category": 64,
+    "image": "https://cdn.epiceries.ca/03131563-5952-457f-8ae3-317b73b34367.43a4609b9cc0b25583218eb8bff3b6cb.jpeg",
+    "link": "https://www.walmart.ca/fr/ip/JTT-Bouch-es-de-Bretzels-au-Chocolat-au-Lait-275g/6000202942957",
+    "url": "https://epiceries.ca/view?i=B2kZGPy7um8F",
+    "updated": "2026-10-29T17:17:55+00:00",
+    "prices": [
+      {
+        "store": "walmart",
+        "price": 5,
+        "discounted": false,
+        "size": "275g",
+        "unitPrice": {
+          "value": 1.82,
+          "unit": "100 g",
+          "raw": "1.82/100g"
+        },
+        "link": "https://www.walmart.ca/fr/ip/JTT-Bouch-es-de-Bretzels-au-Chocolat-au-Lait-275g/6000202942957",
+        "timestamp": 1793257219,
+        "date": "2026-10-29T07:00:19+00:00"
+      }
+    ]
+  }
+}
