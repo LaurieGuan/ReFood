@@ -7,6 +7,11 @@ on:
         required: true
         default: '15698'
         type: string
+      start_offset:
+        description: Source row to start from (0 or a multiple of 100 for remaining shard)
+        required: true
+        default: '0'
+        type: string
 jobs:
   export:
     runs-on: ubuntu-latest
@@ -21,8 +26,10 @@ jobs:
       - name: Fetch dataset metadata (no images)
         env:
           LIMIT: ${{ inputs.limit }}
-        run: python scripts/export_hf_recipes.py --limit "$LIMIT" --workers 4 --out dist/refood-recipes.jsonl.gz
-      - name: Upload compressed recipe data
+          START_OFFSET: ${{ inputs.start_offset }}
+        run: python scripts/export_hf_recipes.py --limit "$LIMIT" --start-offset "$START_OFFSET" --workers 1 --delay 3 --out dist/refood-recipes.jsonl.gz
+      - name: Upload compressed recipe data (including partial export on failure)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: refood-recipes-text-only
