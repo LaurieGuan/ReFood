@@ -57,7 +57,7 @@ class IntegrationsTest(unittest.TestCase):
         self.assertNotEqual(candidates[0].candidate_id, candidates[1].candidate_id)
         with self.assertRaises(ValueError): scan_fridge(b'')
         with patch.dict('os.environ', {}, clear=True):
-            with self.assertRaises(RuntimeError): scan_fridge(b'x')
+            with self.assertRaises(RuntimeError): scan_fridge(b'\x89PNG\r\n\x1a\nx')
 
     def test_prices_real_capture(self):
         product = parse_product(fixture('product')['data'])

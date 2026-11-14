@@ -19,6 +19,8 @@ export function RecipeDetails({ recipe, onClose, onChoose, saved, onToggle }) {
         <div className="safety-note">
           Allergènes et adéquation alimentaire : non vérifiés.
         </div>
+        {recipe.preference_warnings?.map((warning) => <p className="safety-note" key={warning}>{warning}</p>)}
+        {recipe.nutrition && <section><h3>Nutrition source</h3><ul>{Object.entries(recipe.nutrition).filter(([,v]) => v != null).map(([key,value]) => <li key={key}>{key.replaceAll('_pdv', '').replaceAll('_', ' ')} : {value} {key === 'calories' ? 'kcal' : key.endsWith('_pdv') ? '% valeur quotidienne' : 'g'}</li>)}</ul></section>}
         <h3>Ingrédients</h3>
         <ul className="detail-list">
           {recipe.ingredients.map((item, index) => (

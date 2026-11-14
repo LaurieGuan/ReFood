@@ -1,5 +1,6 @@
 """Shared recipe and matching contracts. Prefer additive, backward-compatible changes."""
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+from math import isfinite
 from .ingredients import IngredientWithQuantity
 
 
@@ -38,9 +39,37 @@ class RecipeMatch(BaseModel):
     match_score: float = Field(ge=0, le=1)
     missing_ingredients: list[IngredientWithQuantity]
     quantity_uncertain: bool = False
+    preference_warnings: list[str] = Field(default_factory=list)
 
 
 class RecipeSearchRequest(BaseModel):
+    preferences: dict = Field(default_factory=dict)
+
+    @field_validator("preferences")
+    @classmethod
+    def validate_preferences(cls, value):
+        for key in ("dietary_restrictions", "allergens", "intolerances", "excluded_ingredient_ids"):
+            if key in value and (not isinstance(value[key], list) or not all(isinstance(x, str) for x in value[key])):
+                raise ValueError(f"{key} must be a list of strings")
+        numbers = [value.get("max_minutes"), value.get("max_budget_cad")]
+        limits = value.get("nutrition_limits") or {}
+        if not isinstance(limits, dict):
+            raise ValueError("nutrition_limits must be an object")
+        for bounds in limits.values():
+            if not isinstance(bounds, dict):
+                raise ValueError("Nutrition bounds must be objects")
+            numbers.extend(bounds.get(bound) for bound in ("min", "max"))
+        for number in numbers:
+            if number in (None, ''):
+                continue
+            try:
+                valid = not isinstance(number, bool) and isfinite(float(number)) and float(number) >= 0
+            except (TypeError, ValueError):
+                valid = False
+            if not valid:
+                raise ValueError("Preference limits must be finite nonnegative numbers")
+        return value
+
     ingredients: list[IngredientWithQuantity]
     max_missing: int | None = Field(default=None, ge=0)
     limit: int = Field(default=10, ge=1, le=100)

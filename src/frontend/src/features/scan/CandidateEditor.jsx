@@ -11,6 +11,7 @@ export function CandidateEditor({ scan, onConfirm, loading }) {
     setManualName,
     invalidQuantity,
     invalidCanonical,
+    duplicateError,
     update,
     addManual,
     confirm,
@@ -40,6 +41,7 @@ export function CandidateEditor({ scan, onConfirm, loading }) {
           ＋ Ajouter
         </button>
       </div>
+      {duplicateError && <p className="pantry-error" role="alert">{duplicateError}</p>}
       {invalidQuantity && (
         <p className="pantry-error" role="alert">
           Les quantités doivent être des nombres positifs ou nuls.
@@ -62,7 +64,7 @@ export function CandidateEditor({ scan, onConfirm, loading }) {
         <button
           type="button"
           className="button primary"
-          disabled={loading || approved.length === 0 || invalidQuantity || invalidCanonical}
+          disabled={loading || approved.length === 0 || invalidQuantity || invalidCanonical || !!duplicateError}
           onClick={confirm}
         >
           {loading

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { canonicalIngredient } from '../../utils/canonicalIngredient.js';
+import { confirmedItems } from './confirmation.js';
 
 function normalizeCandidates(scan) {
   return (scan.confirmedItems ?? scan.candidates).map((item, index) => ({
@@ -22,11 +23,8 @@ export function useCandidateEditor({ scan, onConfirm }) {
     setItems((current) => [...current, { candidate_id: `manual_${Date.now()}_${current.length}`, name: manualName, editedName: manualName, certainty: 'manual', quantityText: '', unitChoice: 'unknown', remaining_fraction: null, location: 'fridge', source: 'manual', approved: true }]);
     setManualName('');
   };
-  const confirm = () => onConfirm(approved.map((item) => {
-    const original = item.editedName.trim() === item.name.trim() && item.ingredient_id;
-    const identity = original ? { ingredient_id: item.ingredient_id, name: item.name } : canonicalIngredient(item.editedName);
-    const quantity = item.quantityText === '' ? null : Number(item.quantityText);
-    return { ...identity, quantity, unit: quantity == null ? 'unknown' : item.unitChoice, remaining_fraction: item.remaining_fraction, location: item.location, source: item.source };
-  }));
-  return { items, approved, manualName, setManualName, invalidQuantity, invalidCanonical, update, addManual, confirm };
+  let duplicateError = '';
+  try { confirmedItems(items); } catch (e) { duplicateError = e.message; }
+  const confirm = () => onConfirm(confirmedItems(items));
+  return { items, approved, manualName, setManualName, invalidQuantity, invalidCanonical, duplicateError, update, addManual, confirm };
 }

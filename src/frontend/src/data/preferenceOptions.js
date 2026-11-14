@@ -19,6 +19,9 @@ export const preferenceOptions = {
   ],
   nutrients: [
     { id: 'calories', label: 'Calories', unit: 'kcal' },
+    { id: 'carbs_pdv', label: 'Glucides (source)', unit: '% VQ' },
+    { id: 'total_fat_pdv', label: 'Lipides (source)', unit: '% VQ' },
+    { id: 'protein_pdv', label: 'Protéines (source)', unit: '% VQ' },
     { id: 'carbs', label: 'Glucides', unit: 'g' },
     { id: 'fat', label: 'Lipides', unit: 'g' },
     { id: 'protein', label: 'Protéines', unit: 'g' },

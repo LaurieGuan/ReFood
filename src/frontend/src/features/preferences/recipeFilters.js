@@ -2,6 +2,7 @@ import { recipeFilterData } from '../../data/recipeFilterData.js';
 
 // Filters are conservative: unknown metadata cannot satisfy an active constraint.
 export function matchesPreferences(recipe, preferences = {}) {
+  if (recipe.preferences_evaluated) return true; // Server filters the full catalog before ranking/limit.
   const fixture = recipe.source === 'demo' ? (recipeFilterData[recipe.id] ?? {}) : {};
   const data = { ...fixture, ...recipe, nutrition: recipe.nutrition ?? fixture.nutrition, intolerances: recipe.intolerances ?? fixture.intolerances, estimated_cost_cad: recipe.estimated_cost_cad ?? fixture.estimated_cost_cad };
   const diets = preferences.dietary_restrictions ?? [];

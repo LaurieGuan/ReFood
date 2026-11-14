@@ -2,6 +2,7 @@
 import copy
 import json
 import time
+from threading import Lock
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from urllib.parse import urlencode
@@ -9,6 +10,8 @@ from urllib.request import Request, urlopen
 from schemas.prices import GroceryProduct, GrocerySearchResponse, StorePrice, UnitPrice
 
 _CACHE = {}
+_REQUEST_LOCK = Lock()
+_LAST_REQUEST = 0.0
 
 
 def cad_cents(value):
@@ -61,6 +64,7 @@ def parse_product(data: dict) -> GroceryProduct:
 
 
 def _request(**params):
+    global _LAST_REQUEST
     url = 'https://epiceries.ca/api?' + urlencode(params)
     cached = _CACHE.get(url)
     if cached and time.monotonic() - cached[0] < 300:
@@ -85,10 +89,13 @@ def get_grocery_categories() -> list[dict]:
     return _request(endpoint='categories')['categories']
 
 
-def search_grocery_products(query: str, limit: int = 10) -> GrocerySearchResponse:
+def search_grocery_products(query: str, limit: int = 10, *, category: int | None = None) -> GrocerySearchResponse:
     if not isinstance(query, str) or len(query.strip()) < 2 or not 1 <= limit <= 100:
         raise ValueError('query needs 2 characters; limit must be 1–100')
-    data = _request(endpoint='search', q=query.strip(), limit=limit, sort='price_asc')
+    if category is not None and category not in {c['id'] for c in get_grocery_categories()}:
+        raise ValueError('Unknown provider category')
+    params = {'category': category} if category is not None else {}
+    data = _request(endpoint='search', q=query.strip(), limit=limit, sort='price_asc', **params)
     return GrocerySearchResponse(query=query.strip(), results=[parse_product(p) for p in data['results']],
         has_more=data.get('hasMore') is True, fetched_at=datetime.now(timezone.utc))
 

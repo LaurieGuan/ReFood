@@ -31,6 +31,8 @@ export function RecipeGrid({ recipes, saved, onOpen, onToggle }) {
               </div>
               <div className="recipe-copy">
                 <h3>{recipe.title}</h3>
+                {recipe.nutrition?.calories != null && <small>{recipe.nutrition.calories} kcal · source</small>}
+                {!!recipe.preference_warnings?.length && <small>Adéquation alimentaire à vérifier</small>}
                 <p>
                   {recipe.match?.missing_ingredient_ids?.length
                     ? `À prévoir : ${(recipe.match.missing_ingredients ?? recipe.match.missing_ingredient_ids.map((id) => ({ name: mockApi.ingredientName(id) }))).map((item) => label(item.name)).join(", ")}`

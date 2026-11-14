@@ -5,7 +5,7 @@ from importlib import import_module
 from flask import Blueprint, request
 from werkzeug.exceptions import BadRequest
 
-from schemas.prices import GrocerySearchResponse
+from schemas.prices import GrocerySearchResponse, GroceryProduct
 from .http_utils import json_response
 
 grocery_bp = Blueprint("grocery", __name__)
@@ -33,4 +33,20 @@ def search_products():
         raise BadRequest("q must contain at least two characters")
     if not 1 <= limit <= 100:
         raise BadRequest("limit must be an integer between 1 and 100")
-    return json_response(GrocerySearchResponse, search_grocery_products(query, limit))
+    category = request.args.get("category")
+    if category is not None:
+        try:
+            category = int(category)
+            from services.grocery_prices import search_grocery_products as provider_search
+            result = provider_search(query, limit, category=category)
+        except ValueError:
+            raise BadRequest("Unknown or invalid grocery category") from None
+    else:
+        result = search_grocery_products(query, limit)
+    return json_response(GrocerySearchResponse, result)
+
+
+@grocery_bp.get("/<product_id>")
+def product_details(product_id):
+    service = import_module("services.grocery_prices")
+    return json_response(GroceryProduct, service.get_grocery_product(product_id))

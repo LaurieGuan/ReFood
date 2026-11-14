@@ -54,7 +54,7 @@ export function StoreCard({
       </div>
       <div className="store-total">
         <span>
-          Total des paquets ({offers.length}/{missingCount} ingrédients)
+          {offers.length === missingCount ? "Panier complet" : "Panier incomplet · sous-total"} ({offers.length}/{missingCount} ingrédients)
         </span>
         <b>{money(total)}</b>
       </div>

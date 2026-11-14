@@ -27,6 +27,9 @@ def _strings(value):
 
 
 def parse_recipe(row: dict) -> Recipe:
+    source_id = row.get('recipe_id')
+    if isinstance(source_id, bool) or not isinstance(source_id, (int, str)) or not str(source_id).strip():
+        raise ValueError('Missing or malformed source recipe ID')
     names = _strings(row.get('ingredients'))
     if not names:
         # Actual dataset has NO ingredients column: recover the isolated Markdown section.
@@ -76,3 +79,71 @@ def import_recipes(*, live=False, limit=100, rows=None) -> list[Recipe]:
         except (ValueError, TypeError, AttributeError):
             continue
     return list(recipes.values())
+
+
+def import_jsonl_gzip(path, repository, *, batch_size=200, rejection_file=None):
+    """Stream the text-only Actions artifact into an existing SQLRepository.
+
+    Each batch commits atomically. Counts are source rows/upsert operations,
+    not net new rows (reruns are intentionally idempotent).
+    """
+    import gzip
+    if not 1 <= batch_size <= 1000:
+        raise ValueError('batch_size must be 1–1000')
+    stats = {'read': 0, 'accepted': 0, 'rejected': 0, 'upserted': 0}
+    batch = {}
+    with gzip.open(path, 'rt', encoding='utf-8') as source:
+        for line_number, line in enumerate(source, 1):
+            stats['read'] += 1
+            try:
+                row = json.loads(line)
+                if not isinstance(row, dict):
+                    raise ValueError('Expected recipe object')
+                if not isinstance(row.get('ingredients'), list) or not all(isinstance(n, str) and n.strip() for n in row['ingredients']):
+                    raise ValueError('Expected nonempty ingredient labels')
+                expected = _number(row.get('n_ingredients'), True)
+                if expected is not None and expected != len(row['ingredients']):
+                    raise ValueError('Ingredient count mismatch')
+                recipe = parse_recipe(row)
+                if not recipe.instructions:
+                    raise ValueError('Missing instructions')
+                if len(recipe.recipe_id) > 191 or any(len(i.ingredient_id) > 191 or len(i.name) > 512 for i in recipe.ingredients):
+                    raise ValueError('Identity exceeds storage limit')
+            except (ValueError, TypeError, AttributeError) as exc:
+                stats['rejected'] += 1
+                if rejection_file:
+                    rejection_file.write(json.dumps({'line': line_number, 'reason': str(exc).splitlines()[0][:200]}) + '\n')
+                continue
+            stats['accepted'] += 1
+            batch[recipe.recipe_id] = recipe
+            if len(batch) >= batch_size:
+                stats['upserted'] += repository.save_recipes(list(batch.values()))
+                batch.clear()
+    if batch:
+        stats['upserted'] += repository.save_recipes(list(batch.values()))
+    return stats
+
+
+def main():
+    import argparse
+    from dotenv import load_dotenv
+    parser = argparse.ArgumentParser(description='Import text-only refood-recipes.jsonl.gz; no Hugging Face calls')
+    parser.add_argument('artifact', type=Path)
+    parser.add_argument('--batch-size', type=int, default=200)
+    parser.add_argument('--rejections', type=Path, default=Path('recipe-rejections.jsonl'))
+    args = parser.parse_args()
+    load_dotenv(Path(__file__).resolve().parents[1] / '.env', override=False)
+    from database.engine import get_engine
+    from database.orm_models import Base
+    from database.catalog import SQLRepository
+    engine = get_engine()
+    Base.metadata.create_all(engine)
+    with args.rejections.open('w', encoding='utf-8') as rejected:
+        stats = import_jsonl_gzip(args.artifact, SQLRepository(engine), batch_size=args.batch_size, rejection_file=rejected)
+    print(json.dumps(stats))
+    if not stats['accepted']:
+        raise SystemExit('No valid recipes imported; database may be empty')
+
+
+if __name__ == '__main__':
+    main()

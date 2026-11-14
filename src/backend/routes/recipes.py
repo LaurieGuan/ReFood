@@ -17,6 +17,15 @@ recipes_bp = Blueprint("recipes", __name__)
 
 def find_recipes(request_model: RecipeSearchRequest) -> list[RecipeMatch]:
     """Call Developer 2's matcher, falling back to a schema-valid demo mock."""
+    from flask import current_app
+    if current_app.config.get("DATABASE_URL"):
+        from database.catalog import SQLRepository
+        from database.engine import get_engine
+        from services.recipe_matcher import match_recipes
+        recipes = SQLRepository(get_engine(current_app.config["DATABASE_URL"])).get_recipes()
+        if not recipes:
+            raise ServiceUnavailable("Recipe database is empty; import refood-recipes.jsonl.gz first")
+        return match_recipes(request_model, recipes)
     try:
         matcher = import_module("services.recipe_matcher").find_recipes
     except ModuleNotFoundError as exc:

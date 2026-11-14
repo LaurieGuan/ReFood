@@ -24,3 +24,22 @@ test('rejects unlabeled products and obvious personal-care categories', () => {
   assert.equal(classifyGroceryProduct(milk, { name: '', category_id: 7 }).eligible, false);
   assert.equal(classifyGroceryProduct({ ingredient_id: 'ing_rice', name: 'rice' }, { name: 'Riz nettoyant', category_id: 70 }).eligible, false);
 });
+
+test('does not price ambiguous matches or soap with missing taxonomy', () => {
+  assert.equal(classifyGroceryProduct(milk, {name:'Milk soap',category_id:null}).eligible,false);
+  assert.equal(classifyGroceryProduct(milk, {name:'Lait 2%',category_id:null}).verified,false);
+  assert.equal(classifyGroceryProduct(milk, {name:'Lait chocolat',category_id:7}).eligible,false);
+  assert.equal(classifyGroceryProduct({ingredient_id:'ing_chicken',name:'chicken'}, {name:'Dinde',category_id:16}).eligible,false);
+});
+
+test('real provider misleading milk labels do not count as regular milk', () => {
+  assert.equal(classifyGroceryProduct(milk,{name:'Lait de coco',category_id:7}).eligible,false);
+  assert.equal(classifyGroceryProduct(milk,{name:'Lait 1% Edition Limitée',category_id:7}).verified,false);
+  assert.equal(classifyGroceryProduct(milk,{name:'Lait 1%',category_id:7,retailer_link:'https://example.test/lait-aromatise-a-la-peche-et-mangue-1'}).eligible,false);
+});
+
+test('plain-milk vocabulary leaves unknown flavors visibly unverified',()=>{
+  assert.equal(classifyGroceryProduct(milk,{name:'Lait frappé aux fraises',category_id:7}).eligible,false);
+  assert.equal(classifyGroceryProduct(milk,{name:'Lait aux bleuets',category_id:7}).verified,false);
+  assert.equal(classifyGroceryProduct(milk,{name:'Lait partiellement écrémé 2% 2 L',category_id:7}).verified,true);
+});

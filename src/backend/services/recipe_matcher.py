@@ -67,6 +67,10 @@ def match_recipes(request: RecipeSearchRequest, recipes: list[Recipe]) -> list[R
             stock[item.ingredient_id].append(item)
     results = []
     for recipe in recipes:
+        from .recipe_preferences import assess_recipe
+        eligible, warnings = assess_recipe(recipe, request.preferences)
+        if not eligible:
+            continue
         requirements = defaultdict(list)
         for item in recipe.ingredients:
             requirements[item.ingredient_id].append(item)
@@ -98,7 +102,7 @@ def match_recipes(request: RecipeSearchRequest, recipes: list[Recipe]) -> list[R
         results.append(RecipeMatch(
             recipe=recipe.model_copy(deep=True),
             match_score=covered / len(requirements),
-            missing_ingredients=missing, quantity_uncertain=uncertain,
+            missing_ingredients=missing, quantity_uncertain=uncertain, preference_warnings=warnings,
         ))
     results.sort(key=lambda match: (
         -match.match_score, len(match.missing_ingredients),

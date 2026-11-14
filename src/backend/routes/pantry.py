@@ -54,5 +54,11 @@ def read_pantry():
 @pantry_bp.put("")
 def update_pantry():
     update = validate_request(PantryUpdateRequest)
+    from services.pantry_confirmation import confirm_pantry
+    from werkzeug.exceptions import UnprocessableEntity
+    try:
+        update = confirm_pantry(update)
+    except ValueError as exc:
+        raise UnprocessableEntity(str(exc)) from None
     result = replace_pantry(demo_user_id(), update)
     return json_response(PantryResponse, result)

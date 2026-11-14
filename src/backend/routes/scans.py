@@ -4,7 +4,7 @@ from importlib import import_module
 from uuid import uuid4
 
 from flask import Blueprint, request
-from werkzeug.exceptions import BadRequest, RequestEntityTooLarge
+from werkzeug.exceptions import BadRequest, RequestEntityTooLarge, BadGateway
 
 from schemas.scanning import ScanCandidate, ScanResponse
 from .http_utils import json_response
@@ -38,6 +38,11 @@ def create_scan():
     if not image_bytes:
         raise BadRequest("Image upload is empty")
 
-    candidates = scan_fridge(image_bytes)
+    try:
+        candidates = scan_fridge(image_bytes)
+    except ValueError:
+        raise BadRequest("Invalid image; upload JPEG, PNG or WebP") from None
+    except RuntimeError:
+        raise BadGateway("Vision provider unavailable or invalid response; check server configuration and quota") from None
     response = ScanResponse(scan_id=f"scan_{uuid4().hex}", candidates=candidates)
     return json_response(ScanResponse, response)

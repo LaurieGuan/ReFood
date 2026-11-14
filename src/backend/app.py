@@ -9,6 +9,10 @@ from routes.errors import register_error_handlers
 
 
 def create_app(test_config=None):
+    if test_config is None:
+        from dotenv import load_dotenv
+        from pathlib import Path
+        load_dotenv(Path(__file__).with_name(".env"), override=False)
     app = Flask(__name__)
     app.config.from_mapping(load_config())
     if test_config is not None:

@@ -53,7 +53,9 @@ export function CandidateRow({ item, loading, onUpdate }) {
         <option value="unknown">unité ?</option>
         <option value="piece">pièce(s)</option>
         <option value="g">g</option>
+        <option value="kg">kg</option>
         <option value="ml">ml</option>
+        <option value="l">L</option>
       </select>
       <select
         className="candidate-location"

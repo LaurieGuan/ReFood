@@ -74,6 +74,7 @@ export function StoreScreen({
           })}
         </div>
       )}
+      {!!priceData.unverified?.length && <p className="safety-note">Correspondances non vérifiées, exclues des totaux : {priceData.unverified.map((p) => `${p.ingredient_name} → ${p.product_name}`).join('; ')}</p>}
       {priceData.unpriced_ingredient_ids.length > 0 && (
         <p className="unpriced-note">
           Prix introuvable pour :{" "}
@@ -162,7 +163,7 @@ export function ExportScreen({
         )}
         {selectedStore && offers.length > 0 && (
           <div className="export-total">
-            <span>Coût indicatif des paquets</span>
+            <span>{offers.length === missing.length ? "Panier complet · coût indicatif" : "Panier incomplet · sous-total indicatif"}</span>
             <b>
               {offers
                 .reduce((sum, offer) => sum + Number(offer.price_cad), 0)

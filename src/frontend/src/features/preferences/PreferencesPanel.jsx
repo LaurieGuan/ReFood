@@ -66,7 +66,7 @@ export function PreferencesPanel({ preferences, onSave, loading, saved }) {
           selected={preferences.excluded_ingredient_ids ?? []}
         />
         <fieldset>
-          <legend>Valeurs nutritionnelles par portion</legend>
+          <legend>Valeurs nutritionnelles disponibles (source)</legend>
           <div className="nutrition-fields">
             {options.nutrients.map(({ id, label, unit }) => (
               <div key={id} className="nutrition-row">
@@ -142,9 +142,7 @@ export function PreferencesPanel({ preferences, onSave, loading, saved }) {
           </label>
         </div>
         <p className="safety-note">
-          Les données sont illustratives et ne garantissent pas la sécurité
-          alimentaire. Les recettes dont les données nécessaires sont inconnues
-          sont exclues lorsqu’un filtre est actif.
+          Les incompatibilités connues sont exclues. Les classifications alimentaires inconnues restent à vérifier. Les valeurs nutritionnelles absentes ne satisfont pas une limite active; % VQ ne signifie pas grammes.
         </p>
         <div className="form-actions">
           <span>
